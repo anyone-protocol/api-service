@@ -21,4 +21,4 @@ runs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ inputs.docker-username }}/metrcis-service:${{ github.sha }},${{ inputs.docker-username }}/metrics-service:latest
+        tags: ${{ inputs.docker-username }}/metrics-service:${{ github.sha }},${{ inputs.docker-username }}/metrics-service:latest
