@@ -1,5 +1,5 @@
 import express from 'express';
-import { VictoriaMetricsService } from './victoriaMetricsService';
+import { VictoriaMetricsService } from './VictoriaMetricsService';
 import dotenv from 'dotenv';
 dotenv.config();
 
