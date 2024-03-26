@@ -44,7 +44,7 @@ job "metrics-service" {
         port = "http-port"
         check {
           name     = "Metrics service check"
-          type     = "http"
+          type     = "tcp"
           port     = "http-port"
           path     = "/"
           interval = "10s"
