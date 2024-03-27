@@ -8,12 +8,11 @@ export class VictoriaMetricsService {
     }
 
     async query(query: string): Promise<any> {
-        const response = await axios.get(`${this.baseUrl}/api/v1/query`, {
+        return await (await axios.get(`${this.baseUrl}/api/v1/query`, {
             params: {
                 query: query
             }
-        });
-        return response.data;
+        })).data;
     }
 }
 
