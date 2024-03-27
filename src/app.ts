@@ -11,8 +11,10 @@ const vmService = new VictoriaMetricsService(process.env.VICTORIA_METRICS_ADDRES
 app.get('/metrics/:query', async (req, res) => {
     try {
         const data = await vmService.query(req.params.query);
+        console.log(data);
         res.json(data);
     } catch (error) {
+        console.error(error);
         res.status(500).send('Error querying VictoriaMetrics');
     }
 });
