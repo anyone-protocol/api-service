@@ -8,11 +8,12 @@ export class VictoriaMetricsService {
     }
 
     async query(query: string): Promise<any> {
-        return await (await axios.get(`${this.baseUrl}/api/v1/query`, {
+        const response = await axios.get(`${this.baseUrl}/api/v1/query`, {
             params: {
                 query: query
             }
-        })).data;
+        }).then();
+        return response.data;
     }
 }
 
@@ -24,6 +25,6 @@ axios.interceptors.request.use(request => {
 
 // Response interceptor
 axios.interceptors.response.use(response => {
-    console.log('Response:', JSON.stringify(response, null, 2));
+    console.log('Response:', JSON.stringify(response.data, null, 2));
     return response;
 });
