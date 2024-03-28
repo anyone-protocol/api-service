@@ -12,7 +12,16 @@ app.get('/metrics/:query', async (req, res) => {
     try {
         const data = await vmService.query(req.params.query);
         console.log(data);
-        res.json(data);
+
+        // Transform the response
+        // @ts-ignore
+        const transformedResponse = data.reduce((acc, item) => {
+            acc[item.metric.status] = item.value[1];
+            return acc;
+        }, {});
+        console.log(transformedResponse);
+
+        res.json(transformedResponse);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error querying VictoriaMetrics');
@@ -24,6 +33,7 @@ app.get('/total-relays', async (req, res) => {
     try {
         const data = await vmService.query("total_relays{cluster=\"local\", env=\"main\", instance=\"10.1.244.1:9190\", job=\"consulagentonionoo\"}");
         console.log(data);
+
         res.json(data);
     } catch (error) {
         console.error(error);
