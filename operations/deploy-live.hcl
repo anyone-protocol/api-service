@@ -1,21 +1,21 @@
-job "metrics-service" {
+job "metrics-service-live" {
   datacenters = ["ator-fin"]
   type        = "service"
   namespace   = "ator-network"
 
-  group "metrics-service-group" {
+  group "metrics-service-live-group" {
     count = 1
 
     network {
       mode = "bridge"
       port "http-port" {
-        static       = 9033
+        static       = 9233
         to           = 3000
         #host_network = "wireguard"
       }
     }
 
-    task "metrics-service-task" {
+    task "metrics-service-live-task" {
       driver = "docker"
 
       template {
@@ -44,7 +44,7 @@ job "metrics-service" {
       }
 
       service {
-        name = "metrics-service"
+        name = "metrics-service-live"
         port = "http-port"
         check {
           name     = "Metrics service check"

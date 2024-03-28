@@ -5,20 +5,22 @@ inputs:
     required: true
   docker-password:
     required: true
+  docker-tag:
+    required: true
 
 runs:
   using: "composite"
   steps:
     - name: Log in to Docker Hub
-      uses: docker/login-action@v3
+      uses: docker/login-action@v1
       with:
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-password }}
 
     - name: Build and push Docker image of service
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v2
       with:
         context: .
-        file: ./Dockerfile
+        file: ./docker/Dockerfile
         push: true
-        tags: ${{ inputs.docker-username }}/metrics-service:${{ github.sha }},${{ inputs.docker-username }}/metrics-service:latest
+        tags: ${{ inputs.docker-username }}/metrics-service:${{ github.sha }},${{ inputs.docker-username }}/metrics-service:${{ inputs.docker-tag }}

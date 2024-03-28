@@ -1,6 +1,7 @@
 name: 'Deploy new version'
-
 inputs:
+  environment:
+    required: true
   nomad-cacert:
     required: true
   nomad-token:
@@ -20,4 +21,4 @@ runs:
       run: |
         curl -L https://releases.hashicorp.com/nomad/1.6.3/nomad_1.6.3_linux_amd64.zip -o nomad.zip
         unzip nomad.zip
-        ./nomad job run operations/deploy.hcl
+        ./nomad job run operations/deploy-${{ inputs.environment }}.hcl
