@@ -25,7 +25,9 @@ job "metrics-service-stage" {
 	{{ end -}}
         CLUSTER="local"
         ENV="main"
-        INSTANCE="10.1.244.1:9190"
+    {{- range nomadService "onionoo-stage" }}
+        INSTANCE="{{ .Address }}:{{ .Port }}"
+    {{ end -}}
         JOB="consulagentonionoo"
             EOH
         destination = "secrets/file.env"

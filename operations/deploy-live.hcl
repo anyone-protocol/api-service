@@ -25,7 +25,9 @@ job "metrics-service-live" {
 	{{ end -}}
         CLUSTER="local"
         ENV="main"
-        INSTANCE="10.1.244.1:9190"
+    {{- range nomadService "onionoo-live" }}
+        INSTANCE="{{ .Address }}:{{ .Port }}"
+    {{ end -}}
         JOB="consulagentonionoo"
             EOH
         destination = "secrets/file.env"
