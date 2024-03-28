@@ -8,21 +8,30 @@ const port = 3000;
 // Use the service name as the base URL
 const vmService = new VictoriaMetricsService(process.env.VICTORIA_METRICS_ADDRESS as string);
 
+const CLUSTER = process.env.CLUSTER ?? 'local';
+const ENV = process.env.ENV ?? 'main';
+const INSTANCE = process.env.INSTANCE ?? '10.1.244.1:9190';
+const JOB = process.env.JOB ?? 'consulagentonionoo';
+
 app.get('/metrics/:query', async (req, res) => {
     await handleQuery(req.params.query, res);
 });
 
 app.get('/total-relays', async (req, res) => {
-    await handleQuery("total_relays{cluster=\"local\", env=\"main\", instance=\"10.1.244.1:9190\", job=\"consulagentonionoo\"}", res);
+    await handleQuery(buildQuery("total_relays"), res);
 });
 
 app.get('/total-observed-bandwidth', async (req, res) => {
-    await handleQuery("total_observed_bandwidth{cluster=\"local\", env=\"main\", instance=\"10.1.244.1:9190\", job=\"consulagentonionoo\"}", res);
+    await handleQuery(buildQuery("total_observed_bandwidth"), res);
 });
 
 app.get('/average-bandwidth-rate', async (req, res) => {
-    await handleQuery("average_bandwidth_rate{cluster=\"local\", env=\"main\", instance=\"10.1.244.1:9190\", job=\"consulagentonionoo\"}", res);
+    await handleQuery(buildQuery("average_bandwidth_rate"), res);
 });
+
+function buildQuery(metric: string): string {
+    return `${metric}{cluster="${CLUSTER}", env="${ENV}", instance="${INSTANCE}", job="${JOB}"}`;
+}
 
 async function handleQuery(queryString: string, res: any) {
     try {
