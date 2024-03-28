@@ -19,6 +19,40 @@ app.get('/metrics/:query', async (req, res) => {
     }
 });
 
+//total_relays
+app.get('/total-relays', async (req, res) => {
+    try {
+        const data = await vmService.query("total_relays{cluster=\"local\", env=\"main\", instance=\"10.1.244.1:9190\", job=\"consulagentonionoo\"}");
+        console.log(data);
+        res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error querying VictoriaMetrics');
+    }
+});
+
+app.get('/total-observed-bandwidth', async (req, res) => {
+    try {
+        const data = await vmService.query("total_observed_bandwidth{cluster=\"local\", env=\"main\", instance=\"10.1.244.1:9190\", job=\"consulagentonionoo\"}");
+        console.log(data);
+        res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error querying VictoriaMetrics');
+    }
+});
+
+app.get('/average-bandwidth-rate', async (req, res) => {
+    try {
+        const data = await vmService.query("average_bandwidth_rate{cluster=\"local\", env=\"main\", instance=\"10.1.244.1:9190\", job=\"consulagentonionoo\"}");
+        console.log(data);
+        res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error querying VictoriaMetrics');
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
