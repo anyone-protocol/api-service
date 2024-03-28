@@ -23,9 +23,7 @@ job "metrics-service-live" {
 	{{- range nomadService "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
-    {{- range nomadService "onionoo-live" }}
-        INSTANCE="{{ .Address }}:{{ .Port }}"
-    {{ end -}}
+        INSTANCE="10.1.244.1:9290"
         CLUSTER="local"
         ENV="main"
         JOB="consulagentonionoo"
