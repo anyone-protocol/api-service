@@ -15,7 +15,7 @@ app.get('/metrics/:query', async (req, res) => {
 
         // Transform the response
         // @ts-ignore
-        const transformedResponse = data.reduce((acc, item) => {
+        const transformedResponse = data.data.result.reduce((acc, item) => {
             acc[item.metric.status] = item.value[1];
             return acc;
         }, {});
