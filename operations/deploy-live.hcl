@@ -23,11 +23,11 @@ job "metrics-service-live" {
 	{{- range nomadService "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
-        CLUSTER="local"
-        ENV="main"
     {{- range nomadService "onionoo-war-live" }}
         INSTANCE="{{ .Address }}:{{ .Port }}"
     {{ end -}}
+        CLUSTER="local"
+        ENV="main"
         JOB="consulagentonionoo"
             EOH
         destination = "secrets/file.env"

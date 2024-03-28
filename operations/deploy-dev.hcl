@@ -1,7 +1,8 @@
 job "metrics-service-dev" {
-  datacenters = ["ator-fin"]
-  type        = "service"
-  namespace   = "ator-network"
+  datacenters = [
+    "ator-fin"]
+  type = "service"
+  namespace = "ator-network"
 
   group "metrics-service-dev-group" {
     count = 1
@@ -9,8 +10,8 @@ job "metrics-service-dev" {
     network {
       mode = "bridge"
       port "http-port" {
-        static       = 9033
-        to           = 3000
+        static = 9033
+        to = 3000
         #host_network = "wireguard"
       }
     }
@@ -19,29 +20,30 @@ job "metrics-service-dev" {
       driver = "docker"
 
       template {
-        data        = <<EOH
+        data = <<EOH
 	{{- range nomadService "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
-        CLUSTER="local"
-        ENV="main"
     {{- range nomadService "onionoo-war-dev" }}
         INSTANCE="{{ .Address }}:{{ .Port }}"
     {{ end -}}
+        CLUSTER="local"
+        ENV="main"
         JOB="consulagentonionoo"
             EOH
         destination = "secrets/file.env"
-        env         = true
+        env = true
       }
 
       config {
-        image      = "svforte/metrics-service:latest-dev"
+        image = "svforte/metrics-service:latest-dev"
         force_pull = true
-        ports      = ["http-port"]
+        ports = [
+          "http-port"]
       }
 
       resources {
-        cpu    = 256
+        cpu = 256
         memory = 256
       }
 
@@ -49,12 +51,12 @@ job "metrics-service-dev" {
         name = "metrics-service-dev"
         port = "http-port"
         check {
-          name     = "Metrics service check"
-          type     = "tcp"
-          port     = "http-port"
-          path     = "/"
+          name = "Metrics service check"
+          type = "tcp"
+          port = "http-port"
+          path = "/"
           interval = "10s"
-          timeout  = "10s"
+          timeout = "10s"
           check_restart {
             limit = 10
             grace = "30s"
