@@ -25,7 +25,7 @@ job "metrics-service-stage" {
 	{{ end -}}
         CLUSTER="local"
         ENV="main"
-    {{- range nomadService "onionoo-stage" }}
+    {{- range nomadService "onionoo-war-stage" }}
         INSTANCE="{{ .Address }}:{{ .Port }}"
     {{ end -}}
         JOB="consulagentonionoo"
