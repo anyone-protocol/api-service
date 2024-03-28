@@ -24,7 +24,7 @@ job "metrics-service-dev" {
 	{{- range nomadService "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
-    {{- range nomadService "onionoo-war-dev" }}
+    {{- range nomadService "onionoo-dev" }}
         INSTANCE="{{ .Address }}:{{ .Port }}"
     {{ end -}}
         CLUSTER="local"
