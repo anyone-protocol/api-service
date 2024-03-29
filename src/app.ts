@@ -6,7 +6,6 @@ dotenv.config();
 
 const app = express();
 const port = 3000;
-// Use the service name as the base URL
 const vmService = new VictoriaMetricsService(process.env.VICTORIA_METRICS_ADDRESS as string);
 
 const CLUSTER = process.env.CLUSTER ?? 'local';
@@ -47,7 +46,6 @@ async function handleQuery(query: string, params: QueryString.ParsedQs, res: any
         const vmRawData = await vmService.query_range(query, from, to, interval);
         console.log(vmRawData);
 
-        // Transform the response
         const mappedData = vmRawData.data.result.reduce((acc: any, item: any) => {
             acc[item.metric.status] = item.values;
             return acc;
