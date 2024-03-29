@@ -15,6 +15,11 @@ For now there are only three metrics endpoints on each environment available:
 - /total-observed-bandwidth
 - /average-bandwidth-rate
 
+Each endpoint returns data grouped by status: 
+- Online
+- Offline
+- All
+
 By default, data is returned for the last 7 days with interval to 6 hours
 
 In order to change time range and data points interval there are 3 query parameters available:
