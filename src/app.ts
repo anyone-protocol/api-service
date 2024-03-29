@@ -11,7 +11,7 @@ const vmService = new VictoriaMetricsService(process.env.VICTORIA_METRICS_ADDRES
 
 const CLUSTER = process.env.CLUSTER ?? 'local';
 const ENV = process.env.ENV ?? 'main';
-const INSTANCE = process.env.INSTANCE ?? '10.1.244.1:9190';
+const ONIONOO_INSTANCE = process.env.ONIONOO_INSTANCE ?? '10.1.244.1:9190';
 const JOB = process.env.JOB ?? 'consulagentonionoo';
 
 const FROM = process.env.FROM ?? '-7d';
@@ -35,7 +35,7 @@ app.get('/average-bandwidth-rate', async (req, res) => {
 });
 
 function buildQuery(metric: string): string {
-    return `${metric}{cluster="${CLUSTER}", env="${ENV}", instance="${INSTANCE}", job="${JOB}"}`;
+    return `${metric}{cluster="${CLUSTER}", env="${ENV}", instance="${ONIONOO_INSTANCE}", job="${JOB}"}`;
 }
 
 async function handleQuery(query: string, params: QueryString.ParsedQs, res: any) {
