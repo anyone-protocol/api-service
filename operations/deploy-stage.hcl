@@ -11,7 +11,7 @@ job "metrics-service-stage" {
       port "http-port" {
         static       = 9133
         to           = 3000
-        #host_network = "wireguard"
+        host_network = "wireguard"
       }
     }
 
