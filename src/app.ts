@@ -13,15 +13,19 @@ const ENV = process.env.ENV ?? 'main';
 const INSTANCE = process.env.INSTANCE ?? '10.1.244.1:9190';
 const JOB = process.env.JOB ?? 'consulagentonionoo';
 
+const FROM = process.env.FROM ?? '-5d';
+const TO = process.env.TO ?? 'now';
+const INTERVAL = process.env.INTERVAL ?? '4h';
+
 app.get('/query/:query', async (req, res) => {
     await handleQuery(req.params.query, res);
 });
 
 app.get('/query-range/:query', async (req, res) => {
     try {
-        const from = String(req.query.from ?? '-3d');
-        const to = String(req.query.to ?? 'now');
-        const interval = String(req.query.interval ?? '5m');
+        const from = String(req.query.from ?? FROM);
+        const to = String(req.query.to ?? TO);
+        const interval = String(req.query.interval ?? INTERVAL);
 
         const data = await vmService.query_range(req.params.query, from, to, interval);
         console.log(data);
@@ -33,7 +37,7 @@ app.get('/query-range/:query', async (req, res) => {
         }, {});
         console.log(transformedResponse);
 
-        res.json(data);
+        res.json(transformedResponse);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error querying VictoriaMetrics');
