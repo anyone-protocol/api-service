@@ -51,7 +51,7 @@ job "metrics-service-live" {
           "traefik.http.routers.api-live.rule=Host(`api-live.dmz.ator.dev`)",
           "traefik.http.routers.api-live.entrypoints=https",
           "traefik.http.routers.api-live.tls=true",
-          "traefik.http.routers.api-lvie.tls.certresolver=atorresolver",
+          "traefik.http.routers.api-live.tls.certresolver=atorresolver",
         ]
         check {
           name     = "Metrics service check"
