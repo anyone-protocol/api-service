@@ -27,13 +27,13 @@ app.get('/query-range/:query', async (req, res) => {
         console.log(data);
 
         // Transform the response
-        const transformedResponse = data.data.result.reduce((acc: any, item: any) => {
-            acc[item.metric.status] = item.value[1];
-            return acc;
-        }, {});
-        console.log(transformedResponse);
+        // const transformedResponse = data.data.result.reduce((acc: any, item: any) => {
+        //     acc[item.metric.status] = item.value[1];
+        //     return acc;
+        // }, {});
+        // console.log(transformedResponse);
 
-        res.json(transformedResponse);
+        res.json(data);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error querying VictoriaMetrics');
