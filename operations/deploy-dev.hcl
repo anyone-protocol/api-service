@@ -48,6 +48,13 @@ job "metrics-service-dev" {
       service {
         name = "metrics-service-dev"
         port = "http-port"
+        tags = [
+          "traefik.enable=true",
+          "traefik.http.routers.api-dev.rule=Host(`api-dev.dmz.ator.dev`)",
+          "traefik.http.routers.api-dev.entrypoints=https",
+          "traefik.http.routers.api-dev.tls=true",
+          "traefik.http.routers.api-dev.tls.certresolver=atorresolver",
+        ]
         check {
           name = "Metrics service check"
           type = "tcp"
