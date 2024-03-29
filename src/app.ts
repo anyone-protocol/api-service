@@ -1,6 +1,7 @@
 import express from 'express';
 import { VictoriaMetricsService } from './VictoriaMetricsService';
 import dotenv from 'dotenv';
+import QueryString from 'qs';
 dotenv.config();
 
 const app = express();
@@ -13,66 +14,47 @@ const ENV = process.env.ENV ?? 'main';
 const INSTANCE = process.env.INSTANCE ?? '10.1.244.1:9190';
 const JOB = process.env.JOB ?? 'consulagentonionoo';
 
-const FROM = process.env.FROM ?? '-5d';
+const FROM = process.env.FROM ?? '-7d';
 const TO = process.env.TO ?? 'now';
-const INTERVAL = process.env.INTERVAL ?? '4h';
-
-app.get('/query/:query', async (req, res) => {
-    await handleQuery(req.params.query, res);
-});
+const INTERVAL = process.env.INTERVAL ?? '6h';
 
 app.get('/query-range/:query', async (req, res) => {
-    try {
-        const from = String(req.query.from ?? FROM);
-        const to = String(req.query.to ?? TO);
-        const interval = String(req.query.interval ?? INTERVAL);
-
-        const data = await vmService.query_range(req.params.query, from, to, interval);
-        console.log(data);
-
-        // Transform the response
-        const transformedResponse = data.data.result.reduce((acc: any, item: any) => {
-            acc[item.metric.status] = item.values;
-            return acc;
-        }, {});
-        console.log(transformedResponse);
-
-        res.json(transformedResponse);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error querying VictoriaMetrics');
-    }
+    await handleQuery(req.params.query, req.query, res);
 });
 
 app.get('/total-relays', async (req, res) => {
-    await handleQuery(buildQuery("total_relays"), res);
+    await handleQuery(buildQuery("total_relays"), req.query, res);
 });
 
 app.get('/total-observed-bandwidth', async (req, res) => {
-    await handleQuery(buildQuery("total_observed_bandwidth"), res);
+    await handleQuery(buildQuery("total_observed_bandwidth"), req.query, res);
 });
 
 app.get('/average-bandwidth-rate', async (req, res) => {
-    await handleQuery(buildQuery("average_bandwidth_rate"), res);
+    await handleQuery(buildQuery("average_bandwidth_rate"), req.query, res);
 });
 
 function buildQuery(metric: string): string {
     return `${metric}{cluster="${CLUSTER}", env="${ENV}", instance="${INSTANCE}", job="${JOB}"}`;
 }
 
-async function handleQuery(queryString: string, res: any) {
+async function handleQuery(query: string, params: QueryString.ParsedQs, res: any) {
     try {
-        const data = await vmService.query(queryString);
-        console.log(data);
+        const from = String(params.from ?? FROM);
+        const to = String(params.to ?? TO);
+        const interval = String(params.interval ?? INTERVAL);
+
+        const vmRawData = await vmService.query_range(query, from, to, interval);
+        console.log(vmRawData);
 
         // Transform the response
-        const transformedResponse = data.data.result.reduce((acc: any, item: any) => {
-            acc[item.metric.status] = item.value[1];
+        const mappedData = vmRawData.data.result.reduce((acc: any, item: any) => {
+            acc[item.metric.status] = item.values;
             return acc;
         }, {});
-        console.log(transformedResponse);
+        console.log(mappedData);
 
-        res.json(transformedResponse);
+        res.json(mappedData);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error querying VictoriaMetrics');
