@@ -12,7 +12,7 @@ job "metrics-service-dev" {
       port "http-port" {
         static = 9033
         to = 3000
-        #host_network = "wireguard"
+        host_network = "wireguard"
       }
     }
 
