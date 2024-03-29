@@ -13,8 +13,31 @@ const ENV = process.env.ENV ?? 'main';
 const INSTANCE = process.env.INSTANCE ?? '10.1.244.1:9190';
 const JOB = process.env.JOB ?? 'consulagentonionoo';
 
-app.get('/metrics/:query', async (req, res) => {
+app.get('/query/:query', async (req, res) => {
     await handleQuery(req.params.query, res);
+});
+
+app.get('/query-range/:query', async (req, res) => {
+    try {
+        const from = String(req.query.from ?? '-3d');
+        const to = String(req.query.to ?? 'now');
+        const interval = String(req.query.interval ?? '5m');
+
+        const data = await vmService.query_range(req.params.query, from, to, interval);
+        console.log(data);
+
+        // Transform the response
+        const transformedResponse = data.data.result.reduce((acc: any, item: any) => {
+            acc[item.metric.status] = item.value[1];
+            return acc;
+        }, {});
+        console.log(transformedResponse);
+
+        res.json(transformedResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error querying VictoriaMetrics');
+    }
 });
 
 app.get('/total-relays', async (req, res) => {
