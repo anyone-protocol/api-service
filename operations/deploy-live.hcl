@@ -52,6 +52,9 @@ job "metrics-service-live" {
           "traefik.http.routers.api-live.entrypoints=https",
           "traefik.http.routers.api-live.tls=true",
           "traefik.http.routers.api-live.tls.certresolver=atorresolver",
+          "traefik.http.routers.api-dev.middlewares=api-live-ratelimit",
+          "traefik.http.middlewares.api-live-ratelimit.ratelimit.average=3000",
+          "traefik.http.middlewares.api-live-ratelimit.ratelimit.period=1m",
         ]
         check {
           name     = "Metrics service check"

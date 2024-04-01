@@ -54,6 +54,9 @@ job "metrics-service-dev" {
           "traefik.http.routers.api-dev.entrypoints=https",
           "traefik.http.routers.api-dev.tls=true",
           "traefik.http.routers.api-dev.tls.certresolver=atorresolver",
+          "traefik.http.routers.api-dev.middlewares=api-dev-ratelimit",
+          "traefik.http.middlewares.api-dev-ratelimit.ratelimit.average=30",
+          "traefik.http.middlewares.api-dev-ratelimit.ratelimit.period=1m",
         ]
         check {
           name = "Metrics service check"
