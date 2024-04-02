@@ -1,6 +1,5 @@
 job "metrics-service-dev" {
-  datacenters = [
-    "ator-fin"]
+  datacenters = ["ator-fin"]
   type = "service"
   namespace = "ator-network"
 
@@ -11,7 +10,7 @@ job "metrics-service-dev" {
       mode = "bridge"
       port "http-port" {
         static = 9033
-        to = 3000
+        to = 80
         host_network = "wireguard"
       }
     }
@@ -36,8 +35,29 @@ job "metrics-service-dev" {
       config {
         image = "svforte/metrics-service:latest-dev"
         force_pull = true
-        ports = [
-          "http-port"]
+      }
+
+      resources {
+        cpu = 256
+        memory = 256
+      }
+
+    }
+
+    task "varnish-cache-dev-task" {
+      driver = "docker"
+
+      env {
+        VARNISH_HTTP_PORT = "80"
+      }
+
+      config {
+        image = "varnish"
+        force_pull = true
+        volumes = [
+          "local/default.vcl:/etc/varnish/default.vcl:ro"
+        ]
+        ports = ["http-port"]
       }
 
       resources {
@@ -71,7 +91,23 @@ job "metrics-service-dev" {
           }
         }
       }
-    }
 
+      template {
+        change_mode = "noop"
+        data        = <<EOH
+        vcl 4.0;
+
+        backend default {
+            .host = "127.0.0.1";
+            .port = "3000";
+        }
+
+        sub vcl_backend_response {
+            set beresp.ttl = 5m;
+        }
+        EOH
+        destination = "local/default.vcl"
+      }
+    }
   }
 }

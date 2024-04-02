@@ -1,7 +1,7 @@
 job "metrics-service-stage" {
   datacenters = ["ator-fin"]
-  type        = "service"
-  namespace   = "ator-network"
+  type = "service"
+  namespace = "ator-network"
 
   group "metrics-service-stage-group" {
     count = 1
@@ -9,8 +9,8 @@ job "metrics-service-stage" {
     network {
       mode = "bridge"
       port "http-port" {
-        static       = 9133
-        to           = 3000
+        static = 9133
+        to = 80
         host_network = "wireguard"
       }
     }
@@ -19,7 +19,7 @@ job "metrics-service-stage" {
       driver = "docker"
 
       template {
-        data        = <<EOH
+        data = <<EOH
 	{{- range nomadService "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
@@ -29,17 +29,39 @@ job "metrics-service-stage" {
         JOB="consulagentonionoo"
             EOH
         destination = "secrets/file.env"
-        env         = true
+        env = true
       }
 
       config {
-        image      = "svforte/metrics-service:latest-stage"
+        image = "svforte/metrics-service:latest-stage"
         force_pull = true
-        ports      = ["http-port"]
       }
 
       resources {
-        cpu    = 256
+        cpu = 256
+        memory = 256
+      }
+
+    }
+
+    task "varnish-cache-stage-task" {
+      driver = "docker"
+
+      env {
+        VARNISH_HTTP_PORT = "80"
+      }
+
+      config {
+        image = "varnish"
+        force_pull = true
+        volumes = [
+          "local/default.vcl:/etc/varnish/default.vcl:ro"
+        ]
+        ports = ["http-port"]
+      }
+
+      resources {
+        cpu = 256
         memory = 256
       }
 
@@ -52,24 +74,40 @@ job "metrics-service-stage" {
           "traefik.http.routers.api-stage.entrypoints=https",
           "traefik.http.routers.api-stage.tls=true",
           "traefik.http.routers.api-stage.tls.certresolver=atorresolver",
-          "traefik.http.routers.api-dev.middlewares=api-stage-ratelimit",
+          "traefik.http.routers.api-stage.middlewares=api-stage-ratelimit",
           "traefik.http.middlewares.api-stage-ratelimit.ratelimit.average=300",
           "traefik.http.middlewares.api-stage-ratelimit.ratelimit.period=1m",
         ]
         check {
-          name     = "Metrics service check"
-          type     = "tcp"
-          port     = "http-port"
-          path     = "/"
+          name = "Metrics service check"
+          type = "tcp"
+          port = "http-port"
+          path = "/"
           interval = "10s"
-          timeout  = "10s"
+          timeout = "10s"
           check_restart {
             limit = 10
             grace = "30s"
           }
         }
       }
-    }
 
+      template {
+        change_mode = "noop"
+        data        = <<EOH
+        vcl 4.0;
+
+        backend default {
+            .host = "127.0.0.1";
+            .port = "3000";
+        }
+
+        sub vcl_backend_response {
+            set beresp.ttl = 1h;
+        }
+        EOH
+        destination = "local/default.vcl"
+      }
+    }
   }
 }
