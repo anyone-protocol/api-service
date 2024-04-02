@@ -103,7 +103,7 @@ job "metrics-service-stage" {
         }
 
         sub vcl_backend_response {
-            set beresp.ttl = 5m;
+            set beresp.ttl = 1h;
         }
         EOH
         destination = "local/default.vcl"
