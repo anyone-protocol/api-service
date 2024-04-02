@@ -52,7 +52,7 @@ job "metrics-service-stage" {
           "traefik.http.routers.api-stage.entrypoints=https",
           "traefik.http.routers.api-stage.tls=true",
           "traefik.http.routers.api-stage.tls.certresolver=atorresolver",
-          "traefik.http.routers.api-dev.middlewares=api-stage-ratelimit",
+          "traefik.http.routers.api-stage.middlewares=api-stage-ratelimit",
           "traefik.http.middlewares.api-stage-ratelimit.ratelimit.average=300",
           "traefik.http.middlewares.api-stage-ratelimit.ratelimit.period=1m",
         ]
