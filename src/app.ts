@@ -55,7 +55,7 @@ async function handleQuery(query: string, res: any) {
         console.log(vmRawData);
 
         const mappedData = vmRawData.data.result.reduce((acc: any, item: any) => {
-            acc[item.metric.status] = item.values[0];
+            acc[item.metric.status] = item.value[1];
             return acc;
         }, {});
         console.log(mappedData);
