@@ -5,7 +5,7 @@ import QueryString from 'qs';
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT ?? 3000;
 const vmService = new VictoriaMetricsService(process.env.VICTORIA_METRICS_ADDRESS as string);
 
 const CLUSTER = process.env.CLUSTER ?? 'local';
@@ -52,13 +52,13 @@ function buildQuery(metric: string): string {
 async function handleQuery(query: string, res: any) {
     try {
         const vmRawData = await vmService.query(query);
-        console.log(vmRawData);
+        console.log('VM RAW DATA:', vmRawData);
 
         const mappedData = vmRawData.data.result.reduce((acc: any, item: any) => {
             acc[item.metric.status] = item.value[1];
             return acc;
         }, {});
-        console.log(mappedData);
+        console.log('MAPPED DATA:', mappedData);
 
         res.json(mappedData);
     } catch (error) {
@@ -89,6 +89,8 @@ async function handleQueryRange(query: string, params: QueryString.ParsedQs, res
     }
 }
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
 });
+
+export { app };
