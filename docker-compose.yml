@@ -1,0 +1,9 @@
+version: '2.2'
+services:
+  metrics-service:
+    image: metrics-service:latest
+    restart: always
+    environment:
+      VICTORIA_METRICS_ADDRESS: "http://host.docker.internal:8428"
+    ports:
+      - "3000:3000"
