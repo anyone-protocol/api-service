@@ -51,11 +51,11 @@ app.get('/average-bandwidth-rate-latest', async (req, res) => {
 app.get('/relays/:fingerprint', async (req, res) => {
     try {
         const details = await onionooService.details();
+        console.log('Details:', details);
 
         const foundRelay = details.relays.find((relay: { fingerprint: string; }) =>
             relay.fingerprint === req.params.fingerprint
         );
-        
         console.log('Found relay:', foundRelay);
 
         if (foundRelay) {

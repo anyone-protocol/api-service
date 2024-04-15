@@ -8,7 +8,7 @@ export class OnionooService {
     }
 
     async details(): Promise<any> {
-        return  await axios.get(`${this.baseUrl}/details`).then();
+        return  await axios.get(`${this.baseUrl}/details`);
     }
     
 }
