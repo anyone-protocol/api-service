@@ -49,24 +49,30 @@ app.get('/average-bandwidth-rate-latest', async (req, res) => {
 });
 
 app.get('/relays/:fingerprint', async (req, res) => {
-    const details = await onionooService.details();
+    try {
+        const details = await onionooService.details();
 
-    const foundRelay = details.relays.find((relay: { fingerprint: string; }) =>
-        relay.fingerprint === req.params.fingerprint
-    );
+        const foundRelay = details.relays.find((relay: { fingerprint: string; }) =>
+            relay.fingerprint === req.params.fingerprint
+        );
+        
+        console.log('Found relay:', foundRelay);
 
-    if (foundRelay) {
-        const relay = {
-            fingerprint: foundRelay.fingerprint,
-            running: foundRelay.running,
-            consensus_weight: foundRelay.consensus_weight
-        };
-
-        console.log(relay);
-        return res.json(relay);
-    } else {
-        console.log("Relay not found");
-        return res.status(404).send('Relay not found');
+        if (foundRelay) {
+            const relay = {
+                fingerprint: foundRelay.fingerprint,
+                running: foundRelay.running,
+                consensus_weight: foundRelay.consensus_weight
+            };
+            console.log('Relay:', relay);
+            return res.json(relay);
+        } else {
+            console.log("Relay not found");
+            return res.status(404).send('Relay not found');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error querying Onionoo');
     }
 });
 
