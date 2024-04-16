@@ -14,7 +14,8 @@ const ENV = process.env.ENV ?? 'main';
 const ONIONOO_INSTANCE = process.env.ONIONOO_INSTANCE ?? '10.1.244.1:9090';
 const JOB = process.env.JOB ?? 'consulagentonionoo';
 
-const onionooService = new OnionooService(`http://${ONIONOO_INSTANCE}`);
+const ONIONOO_PROTOCOL = process.env.ONIONOO_PROTOCOL ?? 'http://';
+const onionooService = new OnionooService(`${ONIONOO_PROTOCOL}${ONIONOO_INSTANCE}`);
 
 const FROM = process.env.FROM ?? '-7d';
 const TO = process.env.TO ?? 'now';
