@@ -24,6 +24,7 @@ job "metrics-service-live" {
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
         ONIONOO_INSTANCE="10.1.244.1:9290"
+        ONIONOO_PROTOCOL="http://"
         CLUSTER="local"
         ENV="main"
         JOB="consulagentonionoo"
