@@ -37,3 +37,25 @@ Example:
 ```https://api-dev.dmz.ator.dev/total-relays?from=3d&to=now&interval=12h```
 
 Will return the total relays for the last 3 days with interval of 12 hours.
+
+## Relay search
+
+There is also a relay search endpoint available on each environment:
+
+- /relays/{fingerprint}
+
+It allows seeing for a specific relay by its fingerprint. The fingerprint is the unique identifier of a relay.
+
+Example:
+
+```https://api-dev.dmz.ator.dev/relays/54FC95706E969D4FC46974439D1D698AD1C84B64```   
+
+Will return the data for the relay with the fingerprint:
+
+```
+{
+    "fingerprint": "54FC95706E969D4FC46974439D1D698AD1C84B64",
+    "running": true,
+    "consensus_weight": 20
+}
+```
