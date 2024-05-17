@@ -96,12 +96,12 @@ app.get('/relay-map/', async (req, res) => {
         console.log('ip')
         console.log(ipAddresses)
 
-        const geo = ipAddresses.map((ip) => geoLiteService.ipToGeo(ip));
+        const geo = ipAddresses.filter(item => item!== null).map((ip) => geoLiteService.ipToGeo(ip));
         console.log('---')
         console.log('geo')
         console.log(geo)
 
-        const hexes = geo.map((ll) => h3Service.geoToHex(ll[0], ll[1]));
+        const hexes = geo.map((ll) => h3Service.geoToHex(ll![0], ll![1]));
         console.log('---')
         console.log('hex')
         console.log(hexes)
