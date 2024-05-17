@@ -116,7 +116,7 @@ app.get('/relay-map/', async (req, res) => {
         console.log('map')
         console.log(map)
         
-        return map;
+        res.json(map);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error querying relay map');
