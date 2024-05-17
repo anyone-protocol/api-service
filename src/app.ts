@@ -3,6 +3,8 @@ import { VictoriaMetricsService } from './VictoriaMetricsService';
 import { OnionooService } from './OnionooService';
 import dotenv from 'dotenv';
 import QueryString from 'qs';
+import { H3Service } from './H3Service';
+import { GeoLiteService } from './GeoLiteService';
 dotenv.config();
 
 const app = express();
@@ -24,6 +26,9 @@ const INTERVAL = process.env.INTERVAL ?? '6h';
 const TOTAL_RELAYS_METRIC = 'total_relays';
 const TOTAL_OBSERVED_BANDWIDTH_METRIC = 'total_observed_bandwidth';
 const AVERAGE_BANDWIDTH_RATE_METRIC = 'average_bandwidth_rate';
+
+const h3Service = new H3Service();
+const geoLiteService = new GeoLiteService();
 
 app.get('/total-relays', async (req, res) => {
     await handleQueryRange(buildQuery(TOTAL_RELAYS_METRIC), req.query, res);
@@ -74,6 +79,47 @@ app.get('/relays/:fingerprint', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).send('Error querying Onionoo');
+    }
+});
+
+app.get('/relay-map/', async (req, res) => {
+    try {
+        const details = await onionooService.details();
+        console.log('---')
+        console.log('details')
+        console.log(details)
+
+        const ipAddresses: string[] = details.relays.map((relay: any) => 
+            relay.or_addresses[0].split(':')[0]
+        );
+        console.log('---')
+        console.log('ip')
+        console.log(ipAddresses)
+
+        const geo = ipAddresses.map((ip) => geoLiteService.ipToGeo(ip));
+        console.log('---')
+        console.log('geo')
+        console.log(geo)
+
+        const hexes = geo.map((ll) => h3Service.geoToHex(ll[0], ll[1]));
+        console.log('---')
+        console.log('hex')
+        console.log(hexes)
+
+        const map: Map<string, number> = new Map()
+
+        hexes.forEach(value => {
+            const count = map.get(value) || 0;
+            map.set(value, count + 1);
+        });
+        console.log('---')
+        console.log('map')
+        console.log(map)
+        
+        return map;
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error querying relay map');
     }
 });
 
