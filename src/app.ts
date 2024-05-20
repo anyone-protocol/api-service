@@ -85,38 +85,31 @@ app.get('/relays/:fingerprint', async (req, res) => {
 app.get('/relay-map/', async (req, res) => {
     try {
         const details = await onionooService.details();
-        console.log('---')
-        console.log('details')
-        console.log(details)
 
         const ipAddresses: string[] = details.relays.map((relay: any) => 
             relay.or_addresses[0].split(':')[0]
         );
-        console.log('---')
-        console.log('ip')
-        console.log(ipAddresses)
 
         const geo = ipAddresses.filter(item => item!== null).map((ip) => geoLiteService.ipToGeo(ip));
-        console.log('---')
-        console.log('geo')
-        console.log(geo)
 
         const hexes = geo.map((ll) => h3Service.geoToHex(ll![0], ll![1]));
-        console.log('---')
-        console.log('hex')
-        console.log(hexes)
 
-        const map: Map<string, number> = new Map()
+        const map: Map<string, number> = new Map();
 
         hexes.forEach(value => {
             const count = map.get(value) || 0;
             map.set(value, count + 1);
         });
-        console.log('---')
-        console.log('map')
-        console.log(map)
         
-        res.json(JSON.stringify(map));
+        const result: HexInfo[] = [];
+
+        map.forEach((value, key) => {   
+            result.push(
+                new HexInfo(key, value, h3Service.hexToGeo(key), h3Service.hexToBoundary(key))
+            );
+        });
+
+        res.json(result);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error querying relay map');
@@ -165,6 +158,15 @@ async function handleQueryRange(query: string, params: QueryString.ParsedQs, res
         console.error(error);
         res.status(500).send('Error querying VictoriaMetrics');
     }
+}
+
+class HexInfo {
+    constructor(
+        public index: string,
+        public relayCount: number,
+        public geo: number[],
+        public boundary: number[][]
+    ) {}
 }
 
 app.listen(PORT, () => {
