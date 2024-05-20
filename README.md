@@ -59,3 +59,60 @@ Will return the data for the relay with the fingerprint:
     "consensus_weight": 20
 }
 ```
+
+# Relay map
+
+This endpoint returns the list of hexagon cells:
+
+- /relay-map
+
+Each cell contains the next information:
+
+- index (Unique hex id)
+- relayCount (Number of relays situated in the area of this cell)
+- geo (Cell center coordinates)
+- boundary (Cell boundaries coordinates)
+
+Default resolution is set to 4. (~ 1,770 km2)
+
+Example:
+
+```
+[
+    {
+        "index": "8426e3dffffffff",
+        "relayCount": 3,
+        "geo": [
+            37.76842673518504,
+            -97.56336829110103
+        ],
+        "boundary": [
+            [
+                37.526546198152595,
+                -97.54660533413032
+            ],
+            [
+                37.65062141667647,
+                -97.28829260137934
+            ],
+            [
+                37.89215157242739,
+                -97.30445917498328
+            ],
+            [
+                38.0098575245317,
+                -97.58020995813281
+            ],
+            [
+                37.885636518843214,
+                -97.83942795985186
+            ],
+            [
+                37.64385750929758,
+                -97.8219892274576
+            ]
+        ]
+    },
+    ...
+]
+```

@@ -23,6 +23,7 @@ job "metrics-service-live" {
 	{{- range nomadService "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
+        HEXAGON_RESOLUTION="4"
         ONIONOO_INSTANCE="10.1.244.1:9290"
         ONIONOO_PROTOCOL="http://"
         CLUSTER="local"

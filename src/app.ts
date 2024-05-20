@@ -27,7 +27,8 @@ const TOTAL_RELAYS_METRIC = 'total_relays';
 const TOTAL_OBSERVED_BANDWIDTH_METRIC = 'total_observed_bandwidth';
 const AVERAGE_BANDWIDTH_RATE_METRIC = 'average_bandwidth_rate';
 
-const h3Service = new H3Service();
+const resolution = Number(process.env.HEXAGON_RESOLUTION) ?? 4;
+const h3Service = new H3Service(resolution);
 const geoLiteService = new GeoLiteService();
 
 app.get('/total-relays', async (req, res) => {
