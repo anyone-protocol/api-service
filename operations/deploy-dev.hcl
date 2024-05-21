@@ -1,9 +1,9 @@
-job "metrics-service-dev" {
+job "api-service-dev" {
   datacenters = ["ator-fin"]
   type = "service"
   namespace = "ator-network"
 
-  group "metrics-service-dev-group" {
+  group "api-service-dev-group" {
     count = 1
 
     network {
@@ -15,7 +15,7 @@ job "metrics-service-dev" {
       }
     }
 
-    task "metrics-service-dev-task" {
+    task "api-service-dev-task" {
       driver = "docker"
 
       template {
@@ -23,7 +23,6 @@ job "metrics-service-dev" {
 	{{- range nomadService "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
-        HEXAGON_RESOLUTION="4"
         ONIONOO_INSTANCE="10.1.244.1:9090"
         ONIONOO_PROTOCOL="http://"
         CLUSTER="local"
@@ -35,7 +34,7 @@ job "metrics-service-dev" {
       }
 
       config {
-        image = "svforte/metrics-service:latest-dev"
+        image = "svforte/api-service:latest-dev"
         force_pull = true
       }
 
@@ -68,7 +67,7 @@ job "metrics-service-dev" {
       }
 
       service {
-        name = "metrics-service-dev"
+        name = "api-service-dev"
         port = "http-port"
         tags = [
           "traefik.enable=true",
@@ -81,7 +80,7 @@ job "metrics-service-dev" {
           "traefik.http.middlewares.api-dev-ratelimit.ratelimit.period=1m",
         ]
         check {
-          name = "Metrics service check"
+          name = "Api service check"
           type = "tcp"
           port = "http-port"
           path = "/"

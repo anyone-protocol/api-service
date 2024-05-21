@@ -1,6 +1,6 @@
-# metrics-service
+# api-service
 
-This is a service that provides metrics from a Victoria Metrics instance. 
+One of responsibility of this service is to provide metrics from a Victoria Metrics instance. 
 Not all metrics are available, only specific ones.
 
 There are 3 different instances of the service running for each environment:
