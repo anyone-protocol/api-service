@@ -7,4 +7,4 @@ services:
       VICTORIA_METRICS_ADDRESS: "http://host.docker.internal:8428"
       HEXAGON_RESOLUTION: 4
     ports:
-      - "3000:3000"  
+      - "3000:3000"
