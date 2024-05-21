@@ -15,6 +15,12 @@ job "api-service-live" {
       }
     }
 
+    volume "api-service-live" {
+      type      = "host"
+      read_only = false
+      source    = "api-service-live"
+    }
+
     task "api-service-live-task" {
       driver = "docker"
 
@@ -34,6 +40,12 @@ job "api-service-live" {
             EOH
         destination = "secrets/file.env"
         env = true
+      }
+
+      volume_mount {
+        volume      = "api-service-live"
+        destination = "/usr/src/app/data"
+        read_only   = false
       }
 
       config {
