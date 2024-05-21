@@ -3,6 +3,8 @@ import { VictoriaMetricsService } from './VictoriaMetricsService';
 import { OnionooService } from './OnionooService';
 import dotenv from 'dotenv';
 import QueryString from 'qs';
+import { H3Service } from './H3Service';
+import { GeoLiteService } from './GeoLiteService';
 dotenv.config();
 
 const app = express();
@@ -24,6 +26,10 @@ const INTERVAL = process.env.INTERVAL ?? '6h';
 const TOTAL_RELAYS_METRIC = 'total_relays';
 const TOTAL_OBSERVED_BANDWIDTH_METRIC = 'total_observed_bandwidth';
 const AVERAGE_BANDWIDTH_RATE_METRIC = 'average_bandwidth_rate';
+
+const resolution = Number(process.env.HEXAGON_RESOLUTION) ?? 4;
+const h3Service = new H3Service(resolution);
+const geoLiteService = new GeoLiteService();
 
 app.get('/total-relays', async (req, res) => {
     await handleQueryRange(buildQuery(TOTAL_RELAYS_METRIC), req.query, res);
@@ -77,6 +83,40 @@ app.get('/relays/:fingerprint', async (req, res) => {
     }
 });
 
+app.get('/relay-map/', async (req, res) => {
+    try {
+        const details = await onionooService.details();
+
+        const ipAddresses: string[] = details.relays.map((relay: any) => 
+            relay.or_addresses[0].split(':')[0]
+        );
+
+        const geo = ipAddresses.filter(item => item!== null).map((ip) => geoLiteService.ipToGeo(ip));
+
+        const hexes = geo.map((ll) => h3Service.geoToHex(ll![0], ll![1]));
+
+        const map: Map<string, number> = new Map();
+
+        hexes.forEach(value => {
+            const count = map.get(value) || 0;
+            map.set(value, count + 1);
+        });
+        
+        const result: HexInfo[] = [];
+
+        map.forEach((value, key) => {   
+            result.push(
+                new HexInfo(key, value, h3Service.hexToGeo(key), h3Service.hexToBoundary(key))
+            );
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error querying relay map');
+    }
+});
+
 function buildQuery(metric: string): string {
     return `${metric}{cluster="${CLUSTER}", env="${ENV}", instance="${ONIONOO_INSTANCE}", job="${JOB}"}`;
 }
@@ -119,6 +159,15 @@ async function handleQueryRange(query: string, params: QueryString.ParsedQs, res
         console.error(error);
         res.status(500).send('Error querying VictoriaMetrics');
     }
+}
+
+class HexInfo {
+    constructor(
+        public index: string,
+        public relayCount: number,
+        public geo: number[],
+        public boundary: number[][]
+    ) {}
 }
 
 app.listen(PORT, () => {

@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "hex": "node dist/H3Service.js",
+    "geo": "node dist/GeoLiteService.js"
   },
   "keywords": [],
   "author": "",
@@ -22,8 +24,11 @@
   },
   "dependencies": {
     "@types/express": "^4.17.21",
+    "@types/geoip-lite": "^1.4.4",
     "axios": "^1.6.8",
     "dotenv": "^16.4.5",
-    "express": "^4.19.1"
+    "express": "^4.19.1",
+    "geoip-lite": "^1.4.10",
+    "h3-js": "^4.1.0"
   }
 }
