@@ -23,12 +23,14 @@ job "api-service-dev" {
 	{{- range nomadService "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
-        HEXAGON_RESOLUTION="4"
         ONIONOO_INSTANCE="10.1.244.1:9090"
         ONIONOO_PROTOCOL="http://"
         CLUSTER="local"
         ENV="main"
         JOB="consulagentonionoo"
+        HEXAGON_RESOLUTION="4"
+        GEODATADIR="/usr/src/app/data/node_modules/geoip-lite/data"
+      	GEOTMPDIR="/usr/src/app/data/node_modules/geoip-lite/tmp"
             EOH
         destination = "secrets/file.env"
         env = true

@@ -6,5 +6,9 @@ services:
     environment:
       VICTORIA_METRICS_ADDRESS: "http://host.docker.internal:8428"
       HEXAGON_RESOLUTION: 4
+      GEODATADIR: "/usr/src/app/data/node_modules/geoip-lite/data"
+      GEOTMPDIR: "/usr/src/app/data/node_modules/geoip-lite/tmp"
     ports:
       - "3000:3000"
+    volumes:
+      - ./data/:/usr/src/app/data 

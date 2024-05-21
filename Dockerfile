@@ -4,4 +4,4 @@ COPY package*.json ./
 COPY . .
 RUN npm install && npm run build
 EXPOSE 3000
-CMD [ "node", "dist/app.js" ]
+ENTRYPOINT ["sh", "docker-entrypoint.sh"]
