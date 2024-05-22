@@ -1,4 +1,5 @@
 import express from 'express';
+import bodyParser from 'body-parser';
 import { VictoriaMetricsService } from './VictoriaMetricsService';
 import { OnionooService } from './OnionooService';
 import dotenv from 'dotenv';
@@ -8,6 +9,7 @@ import { GeoLiteService } from './GeoLiteService';
 dotenv.config();
 
 const app = express();
+app.use(bodyParser.json());
 const PORT = process.env.PORT ?? 3000;
 const vmService = new VictoriaMetricsService(process.env.VICTORIA_METRICS_ADDRESS as string);
 
@@ -117,6 +119,14 @@ app.get('/relay-map/', async (req, res) => {
     }
 });
 
+app.post('/hardware/relays', (req, res) => {
+    const bodyData: BodyData = req.body;
+  
+    console.log(bodyData);
+  
+    res.status(200).send(bodyData);
+});
+
 function buildQuery(metric: string): string {
     return `${metric}{cluster="${CLUSTER}", env="${ENV}", instance="${ONIONOO_INSTANCE}", job="${JOB}"}`;
 }
@@ -168,6 +178,32 @@ class HexInfo {
         public geo: number[],
         public boundary: number[][]
     ) {}
+}
+
+interface SerNum {
+  type: string;
+  number: string;
+}
+  
+interface PubKey {
+  type: string;
+  number: string;
+}
+  
+interface Cert {
+  type: string;
+  certificate: string;
+}
+  
+interface BodyData {
+  id: string;
+  company: string;
+  format: string;
+  wallet: string;
+  fingerprint: string;
+  SerNums: SerNum[];
+  PubKeys: PubKey[];
+  Certs: Cert[];
 }
 
 app.listen(PORT, () => {
