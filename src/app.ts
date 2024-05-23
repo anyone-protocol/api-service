@@ -1,5 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import { body, validationResult } from 'express-validator';
 import { VictoriaMetricsService } from './VictoriaMetricsService';
 import { OnionooService } from './OnionooService';
 import dotenv from 'dotenv';
@@ -119,10 +120,33 @@ app.get('/relay-map/', async (req, res) => {
     }
 });
 
-app.post('/hardware/relays', (req, res) => {
+const hardware_relay_validation_rules = [
+    body('id').notEmpty().withMessage("id should not be empty"),
+    body('company').notEmpty().withMessage("company should not be empty"),
+    body('format').notEmpty().withMessage("format should not be empty"),
+    body('wallet').notEmpty().withMessage("wallet should not be empty"),
+    body('fingerprint').notEmpty().withMessage("fingerprint should not be empty"),
+    body('serNums').notEmpty().withMessage("serNums should not be empty"),
+    body('serNums.*.type').notEmpty().withMessage("serNums.*.type should not be empty"),
+    body('serNums.*.number').notEmpty().withMessage("serNums.*.number should not be empty"),
+    body('pubKeys').notEmpty().withMessage("ID should not be empty"),
+    body('pubKeys.*.type').notEmpty().withMessage("pubKeys.*.type should not be empty"),
+    body('pubKeys.*.number').notEmpty().withMessage("pubKeys.*.number should not be empty"),
+    body('certs').notEmpty().withMessage("certs should not be empty"),
+    body('certs.*.type').notEmpty().withMessage("certs.*.type should not be empty"),
+    body('certs.*.certificate').notEmpty().withMessage("certs.*.certificate should not be empty")
+];
+
+app.post('/hardware/relays', hardware_relay_validation_rules, (req: any, res: any) => {
     const bodyData: BodyData = req.body;
   
     console.log(bodyData);
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
   
     res.status(200).send(bodyData);
 });
@@ -201,9 +225,9 @@ interface BodyData {
   format: string;
   wallet: string;
   fingerprint: string;
-  SerNums: SerNum[];
-  PubKeys: PubKey[];
-  Certs: Cert[];
+  serNums: SerNum[];
+  pubKeys: PubKey[];
+  certs: Cert[];
 }
 
 app.listen(PORT, () => {
