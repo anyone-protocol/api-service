@@ -1,4 +1,4 @@
-job "geo-db-update-test-live" {
+job "api-service-geoip-db-update-job-live" {
   datacenters = ["ator-fin"]
   type = "batch"
   namespace = "ator-network"
@@ -8,15 +8,19 @@ job "geo-db-update-test-live" {
     prohibit_overlap = true
   }
   
-  group "geo-db-update-test-live" {
+  group "api-service-geoip-db-update-job-live" {
   	
     volume "api-service-live" {
       type      = "host"
       read_only = false
       source    = "api-service-live"
     }
+    
+    vault {
+      policies = ["geo-ip-maxmind"]
+    }
   
-    task "run-weekly-npm-script" {
+    task "geoip-db-update-script" {
       driver = "docker"
       
       volume_mount {
@@ -25,12 +29,22 @@ job "geo-db-update-test-live" {
         read_only   = false
       }
 
+      template {
+        data = <<EOH
+          {{with secret "kv/geo-ip-maxmind"}}
+            LICENSE_KEY="{{.Data.data.SECRET_KEY}}"
+          {{end}}
+        EOH
+        destination = "secrets/file.env"
+        env         = true
+      }
+      
       config {
         image = "node:14-alpine"
         args = [
           "/bin/sh",
           "-c",
-          "cd /data/node_modules/geoip-lite && npm run-script updatedb license_key=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",
+          "cd /data/node_modules/geoip-lite && npm run-script updatedb license_key=$LICENSE_KEY"
         ]
       }
     }
