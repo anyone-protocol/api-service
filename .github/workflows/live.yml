@@ -19,13 +19,13 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: Tag latest
         run: |
-          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/metrics-service:latest-stage
-          docker tag ${{ secrets.DOCKER_HUB_USERNAME }}/metrics-service:latest-stage ${{ secrets.DOCKER_HUB_USERNAME }}/metrics-service:latest
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/metrics-service:latest
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/api-service:latest-stage
+          docker tag ${{ secrets.DOCKER_HUB_USERNAME }}/api-service:latest-stage ${{ secrets.DOCKER_HUB_USERNAME }}/api-service:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/api-service:latest
       - name: Deploy
         uses: ./.github/actions/deploy
         with:
           environment: live
           nomad-cacert: operations/admin-ui-ca.crt
-          nomad-token: ${{ secrets.NOMAD_TOKEN_METRICS_SERVICE_DEPLOY }}
+          nomad-token: ${{ secrets.NOMAD_TOKEN_API_SERVICE_DEPLOY }}
           nomad-addr: ${{ secrets.NOMAD_DEPLOY_ADDR }}

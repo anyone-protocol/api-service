@@ -1,9 +1,9 @@
-job "metrics-service-stage" {
+job "api-service-stage" {
   datacenters = ["ator-fin"]
   type = "service"
   namespace = "ator-network"
 
-  group "metrics-service-stage-group" {
+  group "api-service-stage-group" {
     count = 1
 
     network {
@@ -15,7 +15,13 @@ job "metrics-service-stage" {
       }
     }
 
-    task "metrics-service-stage-task" {
+    volume "api-service-live" {
+      type      = "host"
+      read_only = false
+      source    = "api-service-live"
+    }
+
+    task "api-service-stage-task" {
       driver = "docker"
 
       template {
@@ -23,19 +29,27 @@ job "metrics-service-stage" {
 	{{- range nomadService "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
-        HEXAGON_RESOLUTION="4"
         ONIONOO_INSTANCE="10.1.244.1:9190"
         ONIONOO_PROTOCOL="http://"
         CLUSTER="local"
         ENV="main"
         JOB="consulagentonionoo"
+        HEXAGON_RESOLUTION="4"
+        GEODATADIR="/usr/src/app/data/node_modules/geoip-lite/data"
+      	GEOTMPDIR="/usr/src/app/data/node_modules/geoip-lite/tmp"
             EOH
         destination = "secrets/file.env"
         env = true
       }
 
+      volume_mount {
+        volume      = "api-service-stage"
+        destination = "/usr/src/app/data"
+        read_only   = false
+      }
+
       config {
-        image = "svforte/metrics-service:latest-stage"
+        image = "svforte/api-service:latest-stage"
         force_pull = true
       }
 
@@ -68,7 +82,7 @@ job "metrics-service-stage" {
       }
 
       service {
-        name = "metrics-service-stage"
+        name = "api-service-stage"
         port = "http-port"
         tags = [
           "traefik.enable=true",
@@ -81,7 +95,7 @@ job "metrics-service-stage" {
           "traefik.http.middlewares.api-stage-ratelimit.ratelimit.period=1m",
         ]
         check {
-          name = "Metrics service check"
+          name = "Api service check"
           type = "tcp"
           port = "http-port"
           path = "/"

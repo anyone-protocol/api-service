@@ -1,13 +1,11 @@
 {
-  "name": "metrics-service",
+  "name": "api-service",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest --coverage",
-    "hex": "node dist/H3Service.js",
-    "geo": "node dist/GeoLiteService.js"
+    "test": "jest --coverage"
   },
   "keywords": [],
   "author": "",
