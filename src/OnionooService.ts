@@ -11,7 +11,12 @@ export class OnionooService {
         const response = await axios.get(`${this.baseUrl}/details`).then();
         return response.data;
     }
-    
+
+    async updateHardwareInfo(hardwareInfo: HardwareInfo): Promise<any> {
+        const finferprint = hardwareInfo.fingerprint;
+        const response = await axios.put(`${this.baseUrl}/hardware/relays/${finferprint}`, hardwareInfo).then();
+        return response.data;
+    }
 }
 
 // Request interceptor
@@ -25,3 +30,29 @@ axios.interceptors.response.use(response => {
     console.log('Response:', JSON.stringify(response.data, null, 2));
     return response;
 });
+
+interface SerNum {
+    type: string;
+    number: string;
+}
+    
+interface PubKey {
+    type: string;
+    number: string;
+}
+    
+interface Cert {
+    type: string;
+    certificate: string;
+}
+    
+export interface HardwareInfo {
+    id: string;
+    company: string;
+    format: string;
+    wallet: string;
+    fingerprint: string;
+    serNums: SerNum[];
+    pubKeys: PubKey[];
+    certs: Cert[];
+}

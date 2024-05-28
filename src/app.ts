@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { body, validationResult } from 'express-validator';
 import { VictoriaMetricsService } from './VictoriaMetricsService';
-import { OnionooService } from './OnionooService';
+import { OnionooService, HardwareInfo } from './OnionooService';
 import dotenv from 'dotenv';
 import QueryString from 'qs';
 import { H3Service } from './H3Service';
@@ -137,10 +137,10 @@ const hardware_relay_validation_rules = [
     body('certs.*.certificate').notEmpty().withMessage("certs.*.certificate should not be empty")
 ];
 
-app.post('/hardware/relays', hardware_relay_validation_rules, (req: any, res: any) => {
-    const bodyData: BodyData = req.body;
+app.post('/hardware/relays', hardware_relay_validation_rules, async (req: any, res: any) => {
+    const hardwareInfo: HardwareInfo = req.body;
   
-    console.log(bodyData);
+    console.log('Hardware info: ', hardwareInfo);
 
     const errors = validationResult(req);
 
@@ -148,7 +148,9 @@ app.post('/hardware/relays', hardware_relay_validation_rules, (req: any, res: an
         return res.status(400).json({ errors: errors.array() });
     }
   
-    res.status(200).send(bodyData);
+    const updateHardwareInfo = await onionooService.updateHardwareInfo(hardwareInfo);
+
+    res.status(200).send(updateHardwareInfo);
 });
 
 function buildQuery(metric: string): string {
@@ -202,32 +204,6 @@ class HexInfo {
         public geo: number[],
         public boundary: number[][]
     ) {}
-}
-
-interface SerNum {
-  type: string;
-  number: string;
-}
-  
-interface PubKey {
-  type: string;
-  number: string;
-}
-  
-interface Cert {
-  type: string;
-  certificate: string;
-}
-  
-interface BodyData {
-  id: string;
-  company: string;
-  format: string;
-  wallet: string;
-  fingerprint: string;
-  serNums: SerNum[];
-  pubKeys: PubKey[];
-  certs: Cert[];
 }
 
 app.listen(PORT, () => {
