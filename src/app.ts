@@ -137,7 +137,7 @@ const hardware_relay_validation_rules = [
     body('certs.*.certificate').notEmpty().withMessage("certs.*.certificate should not be empty")
 ];
 
-app.post('/hardware/relays', hardware_relay_validation_rules, async (req: any, res: any) => {
+app.post('/hardware', hardware_relay_validation_rules, async (req: any, res: any) => {
     const hardwareInfo: HardwareInfo = req.body;
   
     console.log('Hardware info: ', hardwareInfo);

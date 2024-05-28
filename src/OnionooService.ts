@@ -14,7 +14,7 @@ export class OnionooService {
 
     async updateHardwareInfo(hardwareInfo: HardwareInfo): Promise<any> {
         const finferprint = hardwareInfo.fingerprint;
-        const response = await axios.put(`${this.baseUrl}/hardware/relays/${finferprint}`, hardwareInfo).then();
+        const response = await axios.put(`${this.baseUrl}/hardware/${finferprint}`, hardwareInfo).then();
         return response.data;
     }
 }
