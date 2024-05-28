@@ -116,3 +116,47 @@ Example:
     ...
 ]
 ```
+
+# Hardware relay info
+
+This endpoint receives the data from hardware relay and send it to Onionoo in order to persist and expose throught the details endpoint.
+
+POST - /hardware
+
+Example of request body:
+
+```
+{
+    "id": "HWrelay",
+    "company": "anyone.io",
+    "format": "broadcast-type:1",
+    "wallet": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+    "fingerprint": "251B4B50E915561C3F168FCA1731BB3BCE826256",
+    "serNums": [
+        {
+            "type": "DEVICE",
+            "number": "c2eeef8a42a50073"
+        },
+        {
+            "type": "ATEC",
+            "number": "0123d4fb782ded6101"
+        }
+    ],
+    "pubKeys": [
+        {
+            "type": "DEVICE",
+            "number": "3a4a8debb486d32d438f38cf24f8b723326fb85cf9c15a2a7f9bc80916dd8d7de8b9990a8fc0a12e72fd990b3569bbbf24970b07a024a03fa51e5b719fe921bf"
+        },
+        {
+            "type": "SIGNER",
+            "number": "4aa155e5c04759c5a82cafa7657bc32cc2fecd8eba5f06d0bb2b6709901108e0958ce41737cd4fbf473f5862a81e95a23979bd9083d1c5fe4cc9ceb1ef9c3735"
+        }
+    ],
+    "certs": [
+        {
+            "type": "DEVICE",
+            "certificate": "3082018930820130a003020102020a400123d4fb782ded6101300a06082a8648ce3d040302303a3110300e060355040a0c0761746f722e696f3126302406035504030c1d6332656565663861343261353030373320205369676e65722043343842301e170d3234303530333231303030305a170d3434303530333231303030305a30353110300e060355040a0c0761746f722e696f3121301f06035504030c18485772656c617920415445434336303842204465766963653059301306072a8648ce3d020106082a8648ce3d030107034200043a4a8debb486d32d438f38cf24f8b723326fb85cf9c15a2a7f9bc80916dd8d7de8b9990a8fc0a12e72fd990b3569bbbf24970b07a024a03fa51e5b719fe921bfa3233021301f0603551d23041830168014e4bdb6983417cbdd1e1dd27d67c2287f7e8acc56300a06082a8648ce3d040302034700304402207f7852a552147ed6935d078806485b995acde4f7380faa5de1697b8907c567e702202bb136ecc14bceecd3f363ef3ebc8fdde2da98a3b1f3964a27e69cf532e47163"
+        }
+    ]
+}
+```
