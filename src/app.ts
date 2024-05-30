@@ -1,11 +1,16 @@
 import express from 'express';
+import bodyParser from 'body-parser';
+import { body, validationResult } from 'express-validator';
 import { VictoriaMetricsService } from './VictoriaMetricsService';
-import { OnionooService } from './OnionooService';
+import { OnionooService, HardwareInfo } from './OnionooService';
 import dotenv from 'dotenv';
 import QueryString from 'qs';
+import { H3Service } from './H3Service';
+import { GeoLiteService } from './GeoLiteService';
 dotenv.config();
 
 const app = express();
+app.use(bodyParser.json());
 const PORT = process.env.PORT ?? 3000;
 const vmService = new VictoriaMetricsService(process.env.VICTORIA_METRICS_ADDRESS as string);
 
@@ -24,6 +29,10 @@ const INTERVAL = process.env.INTERVAL ?? '6h';
 const TOTAL_RELAYS_METRIC = 'total_relays';
 const TOTAL_OBSERVED_BANDWIDTH_METRIC = 'total_observed_bandwidth';
 const AVERAGE_BANDWIDTH_RATE_METRIC = 'average_bandwidth_rate';
+
+const resolution = Number(process.env.HEXAGON_RESOLUTION) ?? 4;
+const h3Service = new H3Service(resolution);
+const geoLiteService = new GeoLiteService();
 
 app.get('/total-relays', async (req, res) => {
     await handleQueryRange(buildQuery(TOTAL_RELAYS_METRIC), req.query, res);
@@ -77,6 +86,73 @@ app.get('/relays/:fingerprint', async (req, res) => {
     }
 });
 
+app.get('/relay-map/', async (req, res) => {
+    try {
+        const details = await onionooService.details();
+
+        const ipAddresses: string[] = details.relays.map((relay: any) => 
+            relay.or_addresses[0].split(':')[0]
+        );
+
+        const geo = ipAddresses.filter(item => item!== null).map((ip) => geoLiteService.ipToGeo(ip));
+
+        const hexes = geo.map((ll) => h3Service.geoToHex(ll![0], ll![1]));
+
+        const map: Map<string, number> = new Map();
+
+        hexes.forEach(value => {
+            const count = map.get(value) || 0;
+            map.set(value, count + 1);
+        });
+        
+        const result: HexInfo[] = [];
+
+        map.forEach((value, key) => {   
+            result.push(
+                new HexInfo(key, value, h3Service.hexToGeo(key), h3Service.hexToBoundary(key))
+            );
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error querying relay map');
+    }
+});
+
+const hardware_relay_validation_rules = [
+    body('id').notEmpty().withMessage("id should not be empty"),
+    body('company').notEmpty().withMessage("company should not be empty"),
+    body('format').notEmpty().withMessage("format should not be empty"),
+    body('wallet').notEmpty().withMessage("wallet should not be empty"),
+    body('fingerprint').notEmpty().withMessage("fingerprint should not be empty"),
+    body('serNums').notEmpty().withMessage("serNums should not be empty"),
+    body('serNums.*.type').notEmpty().withMessage("serNums.*.type should not be empty"),
+    body('serNums.*.number').notEmpty().withMessage("serNums.*.number should not be empty"),
+    body('pubKeys').notEmpty().withMessage("ID should not be empty"),
+    body('pubKeys.*.type').notEmpty().withMessage("pubKeys.*.type should not be empty"),
+    body('pubKeys.*.number').notEmpty().withMessage("pubKeys.*.number should not be empty"),
+    body('certs').notEmpty().withMessage("certs should not be empty"),
+    body('certs.*.type').notEmpty().withMessage("certs.*.type should not be empty"),
+    body('certs.*.signature').notEmpty().withMessage("certs.*.signature should not be empty")
+];
+
+app.post('/hardware', hardware_relay_validation_rules, async (req: any, res: any) => {
+    const hardwareInfo: HardwareInfo = req.body;
+  
+    console.log('Hardware info: ', hardwareInfo);
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+  
+    const updateHardwareInfo = await onionooService.updateHardwareInfo(hardwareInfo);
+
+    res.status(200).send(updateHardwareInfo);
+});
+
 function buildQuery(metric: string): string {
     return `${metric}{cluster="${CLUSTER}", env="${ENV}", instance="${ONIONOO_INSTANCE}", job="${JOB}"}`;
 }
@@ -119,6 +195,15 @@ async function handleQueryRange(query: string, params: QueryString.ParsedQs, res
         console.error(error);
         res.status(500).send('Error querying VictoriaMetrics');
     }
+}
+
+class HexInfo {
+    constructor(
+        public index: string,
+        public relayCount: number,
+        public geo: number[],
+        public boundary: number[][]
+    ) {}
 }
 
 app.listen(PORT, () => {

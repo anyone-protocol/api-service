@@ -1,9 +1,9 @@
-job "metrics-service-live" {
+job "api-service-live" {
   datacenters = ["ator-fin"]
   type = "service"
   namespace = "ator-network"
 
-  group "metrics-service-live-group" {
+  group "api-service-live-group" {
     count = 1
 
     network {
@@ -15,7 +15,13 @@ job "metrics-service-live" {
       }
     }
 
-    task "metrics-service-live-task" {
+    volume "api-service-live" {
+      type      = "host"
+      read_only = false
+      source    = "api-service-live"
+    }
+
+    task "api-service-live-task" {
       driver = "docker"
 
       template {
@@ -28,13 +34,22 @@ job "metrics-service-live" {
         CLUSTER="local"
         ENV="main"
         JOB="consulagentonionoo"
+        HEXAGON_RESOLUTION="4"
+        GEODATADIR="/usr/src/app/data/node_modules/geoip-lite/data"
+      	GEOTMPDIR="/usr/src/app/data/node_modules/geoip-lite/tmp"
             EOH
         destination = "secrets/file.env"
         env = true
       }
 
+      volume_mount {
+        volume      = "api-service-live"
+        destination = "/usr/src/app/data"
+        read_only   = false
+      }
+
       config {
-        image = "svforte/metrics-service:latest"
+        image = "svforte/api-service:latest"
         force_pull = true
       }
 
@@ -67,7 +82,7 @@ job "metrics-service-live" {
       }
 
       service {
-        name = "metrics-service-live"
+        name = "api-service-live"
         port = "http-port"
         tags = [
           "traefik.enable=true",
@@ -80,7 +95,7 @@ job "metrics-service-live" {
           "traefik.http.middlewares.api-live-ratelimit.ratelimit.period=1m",
         ]
         check {
-          name = "Metrics service check"
+          name = "Api service check"
           type = "tcp"
           port = "http-port"
           path = "/"
