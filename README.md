@@ -116,3 +116,48 @@ Example:
     ...
 ]
 ```
+
+# Hardware relay info
+
+This endpoint receives the data from hardware relay and send it to Onionoo in order to persist and expose throught the details endpoint.
+
+POST - /hardware
+
+Example of request body:
+
+```
+{
+    "id": "HWrelay",
+    "company": "anyone.io",
+    "format": "broadcast-type:1",
+    "wallet": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+    "fingerprint": "251B4B50E915561C3F168FCA1731BB3BCE826256",
+    "serNums": [
+        {
+            "type": "DEVICE",
+            "number": "c2eeef8a42a50073"
+        },
+        {
+            "type": "ATEC",
+            "number": "0123d4fb782ded6101"
+        }
+    ],
+    "pubKeys": [
+        {
+            "type": "DEVICE",
+            "number": "3a4a8debb486d32d438f38cf24f8b723326fb85cf9c15a2a7f9bc80916dd8d7de8b9990a8fc0a12e72fd990b3569bbbf24970b07a024a03fa51e5b719fe921bf"
+        },
+        {
+            "type": "SIGNER",
+            "number": "4aa155e5c04759c5a82cafa7657bc32cc2fecd8eba5f06d0bb2b6709901108e0958ce41737cd4fbf473f5862a81e95a23979bd9083d1c5fe4cc9ceb1ef9c3735"
+        }
+    ],
+    "certs": [
+        {
+            "type": "DEVICE",
+            "signature": 
+            "4A B7 B1 E1 7A 8F 7D 8D 68 CB 5D 42 33 B2 4C 9F\r\n55 96 28 56 27 82 C7 DE DF 82 A5 7F 90 0C 3F 6F\r\n1E FE 2F 5B 4F 6C 1D 96 76 54 E2 63 7E 86 8C B3\r\n57 2D 3E 2C 28 58 51 43 23 CD 40 99 6B B4 F2 C3"
+        }
+    ]
+}
+```

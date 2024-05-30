@@ -1,6 +1,8 @@
 import express from 'express';
+import bodyParser from 'body-parser';
+import { body, validationResult } from 'express-validator';
 import { VictoriaMetricsService } from './VictoriaMetricsService';
-import { OnionooService } from './OnionooService';
+import { OnionooService, HardwareInfo } from './OnionooService';
 import dotenv from 'dotenv';
 import QueryString from 'qs';
 import { H3Service } from './H3Service';
@@ -8,6 +10,7 @@ import { GeoLiteService } from './GeoLiteService';
 dotenv.config();
 
 const app = express();
+app.use(bodyParser.json());
 const PORT = process.env.PORT ?? 3000;
 const vmService = new VictoriaMetricsService(process.env.VICTORIA_METRICS_ADDRESS as string);
 
@@ -115,6 +118,39 @@ app.get('/relay-map/', async (req, res) => {
         console.error(error);
         res.status(500).send('Error querying relay map');
     }
+});
+
+const hardware_relay_validation_rules = [
+    body('id').notEmpty().withMessage("id should not be empty"),
+    body('company').notEmpty().withMessage("company should not be empty"),
+    body('format').notEmpty().withMessage("format should not be empty"),
+    body('wallet').notEmpty().withMessage("wallet should not be empty"),
+    body('fingerprint').notEmpty().withMessage("fingerprint should not be empty"),
+    body('serNums').notEmpty().withMessage("serNums should not be empty"),
+    body('serNums.*.type').notEmpty().withMessage("serNums.*.type should not be empty"),
+    body('serNums.*.number').notEmpty().withMessage("serNums.*.number should not be empty"),
+    body('pubKeys').notEmpty().withMessage("ID should not be empty"),
+    body('pubKeys.*.type').notEmpty().withMessage("pubKeys.*.type should not be empty"),
+    body('pubKeys.*.number').notEmpty().withMessage("pubKeys.*.number should not be empty"),
+    body('certs').notEmpty().withMessage("certs should not be empty"),
+    body('certs.*.type').notEmpty().withMessage("certs.*.type should not be empty"),
+    body('certs.*.signature').notEmpty().withMessage("certs.*.signature should not be empty")
+];
+
+app.post('/hardware', hardware_relay_validation_rules, async (req: any, res: any) => {
+    const hardwareInfo: HardwareInfo = req.body;
+  
+    console.log('Hardware info: ', hardwareInfo);
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+  
+    const updateHardwareInfo = await onionooService.updateHardwareInfo(hardwareInfo);
+
+    res.status(200).send(updateHardwareInfo);
 });
 
 function buildQuery(metric: string): string {
