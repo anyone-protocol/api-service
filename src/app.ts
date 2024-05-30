@@ -134,7 +134,7 @@ const hardware_relay_validation_rules = [
     body('pubKeys.*.number').notEmpty().withMessage("pubKeys.*.number should not be empty"),
     body('certs').notEmpty().withMessage("certs should not be empty"),
     body('certs.*.type').notEmpty().withMessage("certs.*.type should not be empty"),
-    body('certs.*.certificate').notEmpty().withMessage("certs.*.certificate should not be empty")
+    body('certs.*.signature').notEmpty().withMessage("certs.*.signature should not be empty")
 ];
 
 app.post('/hardware', hardware_relay_validation_rules, async (req: any, res: any) => {

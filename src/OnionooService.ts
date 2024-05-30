@@ -43,7 +43,7 @@ interface PubKey {
     
 interface Cert {
     type: string;
-    certificate: string;
+    signature: string;
 }
     
 export interface HardwareInfo {
