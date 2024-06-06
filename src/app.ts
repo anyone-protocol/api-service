@@ -99,11 +99,6 @@ app.get('/relays/:fingerprint', async (req, res) => {
     }
 });
 
-app.get('/origin-check/', async (req, res) => {
-    console.log("Request origin:", req.header('origin'));
-    res.status(200).send("ok");
-});    
-
 app.get('/relay-map/', async (req, res) => {
     try {
         const details = await onionooService.details();
