@@ -39,6 +39,7 @@ const h3Service = new H3Service(resolution);
 const geoLiteService = new GeoLiteService();
 
 app.all('*', function(req: any, res, next) {
+    console.log("Origin check.")
     const origin = req.header('origin');
     if (origin && corsConfig.allowedOrigins!.includes(origin.toLowerCase())) {
         res.header("Access-Control-Allow-Origin", origin);
@@ -97,6 +98,11 @@ app.get('/relays/:fingerprint', async (req, res) => {
         res.status(500).send('Error querying Onionoo');
     }
 });
+
+app.get('/origin-check/', async (req, res) => {
+    console.log("Request origin:", req.header('origin'));
+    res.status(200).send("ok");
+});    
 
 app.get('/relay-map/', async (req, res) => {
     try {
