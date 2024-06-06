@@ -51,11 +51,27 @@ job "api-service-dev" {
       config {
         image = "svforte/api-service:latest-dev"
         force_pull = true
+        volumes = [
+          "local/allowed-origins.json:/usr/src/app/data/allowed-origins.json:ro"
+        ]
       }
 
       resources {
         cpu = 256
         memory = 256
+      }
+
+      template {
+        change_mode = "noop"
+        data        = <<EOH
+{
+    "allowedOrigins": [
+        "https://anyone-protocol.webflow.io", 
+        "https://anyone.io"
+    ]
+}        
+        EOH
+        destination = "local/allowed-origins.vcl"
       }
 
     }

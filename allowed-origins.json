@@ -1,0 +1,6 @@
+{
+    "allowedOrigins": [
+        "https://anyone-protocol.webflow.io", 
+        "https://anyone.io"
+    ]
+}

@@ -8,11 +8,13 @@ import dotenv from 'dotenv';
 import QueryString from 'qs';
 import { H3Service } from './H3Service';
 import { GeoLiteService } from './GeoLiteService';
+import { loadCorsConfig } from "./cors"
 dotenv.config();
+
+const corsConfig = loadCorsConfig();
 
 const app = express();
 app.use(bodyParser.json());
-app.use(cors());
 const PORT = process.env.PORT ?? 3000;
 const vmService = new VictoriaMetricsService(process.env.VICTORIA_METRICS_ADDRESS as string);
 
@@ -35,6 +37,14 @@ const AVERAGE_BANDWIDTH_RATE_METRIC = 'average_bandwidth_rate';
 const resolution = Number(process.env.HEXAGON_RESOLUTION) ?? 4;
 const h3Service = new H3Service(resolution);
 const geoLiteService = new GeoLiteService();
+
+app.all('*', function(req: any, res, next) {
+    const origin = req.header('origin');
+    if (origin && corsConfig.allowedOrigins!.includes(origin.toLowerCase())) {
+        res.header("Access-Control-Allow-Origin", origin);
+    }
+    next();
+});
 
 app.get('/total-relays', async (req, res) => {
     await handleQueryRange(buildQuery(TOTAL_RELAYS_METRIC), req.query, res);
