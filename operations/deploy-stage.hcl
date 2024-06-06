@@ -71,7 +71,7 @@ job "api-service-stage" {
     ]
 }        
         EOH
-        destination = "local/allowed-origins.vcl"
+        destination = "local/allowed-origins.json"
       }
 
     }
