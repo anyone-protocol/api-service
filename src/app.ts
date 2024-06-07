@@ -72,7 +72,9 @@ app.get('/relays/:fingerprint', async (req, res) => {
             const relay = {
                 fingerprint: foundRelay.fingerprint,
                 running: foundRelay.running,
-                consensus_weight: foundRelay.consensus_weight
+                consensus_weight: foundRelay.consensus_weight,
+                observed_bandwidth: foundRelay.observed_bandwidth,
+                measured: foundRelay.measured
             };
             console.log('Relay:', relay);
             return res.json(relay);
