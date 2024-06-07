@@ -15,10 +15,10 @@ job "api-service-stage" {
       }
     }
 
-    volume "api-service-live" {
+    volume "api-service-stage" {
       type      = "host"
       read_only = false
-      source    = "api-service-live"
+      source    = "api-service-stage"
     }
 
     task "api-service-stage-task" {
