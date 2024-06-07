@@ -1,5 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import { body, validationResult } from 'express-validator';
 import { VictoriaMetricsService } from './VictoriaMetricsService';
 import { OnionooService, HardwareInfo } from './OnionooService';
@@ -11,6 +12,7 @@ dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 const PORT = process.env.PORT ?? 3000;
 const vmService = new VictoriaMetricsService(process.env.VICTORIA_METRICS_ADDRESS as string);
 
