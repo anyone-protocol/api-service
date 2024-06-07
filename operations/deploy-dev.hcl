@@ -52,7 +52,7 @@ job "api-service-dev" {
         image = "svforte/api-service:latest-dev"
         force_pull = true
         volumes = [
-          "local/allowed-origins.json:/usr/src/app/data/allowed-origins.json:ro"
+          "local/allowed-origins.json:/usr/src/app/config/allowed-origins.json:ro"
         ]
       }
 

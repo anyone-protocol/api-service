@@ -1,7 +1,6 @@
-version: '2.2'
 services:
   api-service:
-    image: api-service:latest
+    image: api-service
     restart: always
     environment:
       VICTORIA_METRICS_ADDRESS: "http://host.docker.internal:8428"
@@ -13,6 +12,11 @@ services:
       - "3000:3000"
     volumes:
       - ./data/:/usr/src/app/data
-      - .allowed-origins.json:/usr/src/app/data/allowed-origins.json
-      
-
+      - ./allowed-origins.json:/usr/src/app/config/allowed-origins.json
+  api-cache:
+    image: varnish
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./varnish-docker.vcl:/etc/varnish/default.vcl:ro

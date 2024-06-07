@@ -39,12 +39,13 @@ const h3Service = new H3Service(resolution);
 const geoLiteService = new GeoLiteService();
 
 app.all('*', function(req: any, res, next) {
-    console.log("Origin check.")
+    console.log("Incoming request:", req);
     const origin = req.header('origin');
     if (origin && corsConfig.allowedOrigins!.includes(origin.toLowerCase())) {
         res.header("Access-Control-Allow-Origin", origin);
     }
     next();
+    console.log("Outgoing response:", res);
 });
 
 app.get('/total-relays', async (req, res) => {

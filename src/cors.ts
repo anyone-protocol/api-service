@@ -6,7 +6,7 @@ interface Config {
 
 export function loadCorsConfig(): Config {
   try {
-    const configFileContent = fs.readFileSync('allowed-origins.json', 'utf8');
+    const configFileContent = fs.readFileSync('config/allowed-origins.json', 'utf8');
     return JSON.parse(configFileContent) as Config;
   } catch (error) {
     console.error(`Error reading config file: ${error}`);
