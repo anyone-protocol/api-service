@@ -119,7 +119,7 @@ job "api-service-stage" {
         }
 
         sub vcl_backend_response {
-            set beresp.ttl = 1h;
+            set beresp.ttl = 5m;
         }
         EOH
         destination = "local/default.vcl"
