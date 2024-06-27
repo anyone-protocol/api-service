@@ -51,6 +51,9 @@ export interface HardwareInfo {
     company: string;
     format: string;
     wallet: string;
+    nftid: string;
+    build: string;
+    flags: string;
     fingerprint: string;
     serNums: SerNum[];
     pubKeys: PubKey[];
