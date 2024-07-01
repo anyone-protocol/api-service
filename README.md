@@ -132,6 +132,9 @@ Example of request body:
     "format": "broadcast-type:1",
     "wallet": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
     "fingerprint": "251B4B50E915561C3F168FCA1731BB3BCE826256",
+    "nftid":"12345",
+    "build":"2.0.1",
+    "flags":"33",
     "serNums": [
         {
             "type": "DEVICE",
