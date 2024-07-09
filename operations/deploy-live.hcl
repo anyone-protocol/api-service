@@ -53,6 +53,11 @@ job "api-service-live" {
         force_pull = true
       }
 
+      service {
+        name = "api-service-live"
+        tags = [ "logging" ]
+      }
+
       resources {
         cpu = 256
         memory = 256
@@ -85,6 +90,7 @@ job "api-service-live" {
         name = "api-service-live"
         port = "http-port"
         tags = [
+          "logging",
           "traefik.enable=true",
           "traefik.http.routers.api-live.rule=Host(`api-live.dmz.ator.dev`)",
           "traefik.http.routers.api-live.entrypoints=https",

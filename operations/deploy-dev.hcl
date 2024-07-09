@@ -48,6 +48,11 @@ job "api-service-dev" {
         read_only   = false
       }
 
+      service {
+        name = "api-service-dev"
+        tags = [ "logging" ]
+      }
+
       config {
         image = "svforte/api-service:latest-dev"
         force_pull = true
@@ -85,6 +90,7 @@ job "api-service-dev" {
         name = "api-service-dev"
         port = "http-port"
         tags = [
+          "logging",
           "traefik.enable=true",
           "traefik.http.routers.api-dev.rule=Host(`api-dev.dmz.ator.dev`)",
           "traefik.http.routers.api-dev.entrypoints=https",
