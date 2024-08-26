@@ -5,9 +5,9 @@ Not all metrics are available, only specific ones.
 
 There are 3 different instances of the service running for each environment:
 
-- https://api-dev.dmz.ator.dev
-- https://api-stage.dmz.ator.dev
-- https://api-live.dmz.ator.dev
+- https://api-dev.ec.anyone.tech
+- https://api-stage.ec.anyone.tech
+- https://api.ec.anyone.tech
 
 For now there are only three metrics endpoints on each environment available:
 
