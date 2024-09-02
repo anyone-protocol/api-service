@@ -90,6 +90,47 @@ app.get('/relays/:fingerprint', async (req, res) => {
     }
 });
 
+app.get('/relays', async (req, res) => {
+    try {
+        const fingerprintsQuery = req.query.fingerprints as string | undefined;
+
+        if (!fingerprintsQuery) {
+            return res.status(400).send('Fingerprints are required');
+        }
+
+        const fingerprints = fingerprintsQuery.split(',');
+
+        if (fingerprints.length === 0) {
+            return res.status(400).send('Fingerprints are required');
+        }
+
+        const details = await onionooService.details();
+
+        const foundRelays = details.relays.filter((relay: { fingerprint: string; }) =>
+            fingerprints.includes(relay.fingerprint)
+        );
+        console.log('Found relays:', foundRelays);
+
+        if (foundRelays.length > 0) {
+            const relays = foundRelays.map((foundRelay : any) => ({
+                fingerprint: foundRelay.fingerprint,
+                running: foundRelay.running,
+                consensus_weight: foundRelay.consensus_weight,
+                observed_bandwidth: foundRelay.observed_bandwidth,
+                measured: foundRelay.measured
+            }));
+            console.log('Result relays:', relays);
+            return res.json(relays);
+        } else {
+            console.log("No relays found");
+            return res.status(404).send('No relays found');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error querying Onionoo');
+    }
+});
+
 app.get('/relay-map/', async (req, res) => {
     try {
         const details = await onionooService.details();
