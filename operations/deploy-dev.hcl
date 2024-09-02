@@ -54,7 +54,7 @@ job "api-service-dev" {
       }
 
       config {
-        image = "svforte/api-service:latest-dev"
+        image = ""ghcr.io/ator-development/api-service:DEPLOY_TAG""
         force_pull = true
       }
 
