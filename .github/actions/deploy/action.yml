@@ -8,6 +8,8 @@ inputs:
     required: true
   nomad-addr:
     required: true
+  docker-tag:
+    required: true  
 
 runs:
   using: "composite"
