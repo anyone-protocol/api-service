@@ -97,8 +97,8 @@ job "api-service-live" {
           "traefik.http.routers.api-live.tls=true",
           "traefik.http.routers.api-live.tls.certresolver=atorresolver",
           "traefik.http.routers.api-live.middlewares=api-live-ratelimit",
-          "traefik.http.middlewares.api-live-ratelimit.ratelimit.average=1000"
-
+          "traefik.http.middlewares.api-live-ratelimit.ratelimit.average=1000",
+          
           "traefik-ec.enable=true",
           "traefik-ec.http.routers.api-live.rule=Host(`api.ec.anyone.tech`)",
           "traefik-ec.http.routers.api-live.entrypoints=https",
