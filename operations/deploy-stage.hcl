@@ -49,7 +49,7 @@ job "api-service-stage" {
       }
 
       config {
-        image = "svforte/api-service:latest-stage"
+        image = "ghcr.io/ator-development/api-service:DEPLOY_TAG"
         force_pull = true
       }
 
@@ -97,7 +97,7 @@ job "api-service-stage" {
           "traefik.http.routers.api-stage.tls=true",
           "traefik.http.routers.api-stage.tls.certresolver=atorresolver",
           "traefik.http.routers.api-stage.middlewares=api-stage-ratelimit",
-          "traefik.http.middlewares.api-stage-ratelimit.ratelimit.average=300",
+          "traefik.http.middlewares.api-stage-ratelimit.ratelimit.average=3000",
           "traefik.http.middlewares.api-stage-ratelimit.ratelimit.period=1m",
           
           "traefik-ec.enable=true",

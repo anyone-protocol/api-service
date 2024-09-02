@@ -14,6 +14,7 @@ runs:
     - name: Log in to Docker Hub
       uses: docker/login-action@v1
       with:
+        registry: ghcr.io
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-password }}
 
@@ -23,4 +24,4 @@ runs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ inputs.docker-username }}/api-service:${{ github.sha }},${{ inputs.docker-username }}/api-service:${{ inputs.docker-tag }}
+        tags: ghcr.io/ator-development/api-service:${{ inputs.docker-tag }}
