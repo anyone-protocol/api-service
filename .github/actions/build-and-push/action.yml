@@ -24,4 +24,4 @@ runs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ghcr.io/ator-development/collector:${{ inputs.docker-tag }}
+        tags: ghcr.io/ator-development/api-service:${{ inputs.docker-tag }}
