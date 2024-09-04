@@ -49,7 +49,7 @@ job "api-service-stage" {
       }
 
       config {
-        image = "ghcr.io/ator-development/api-service:DEPLOY_TAG"
+        image = "ghcr.io/anyone-protocol/api-service:DEPLOY_TAG"
         force_pull = true
       }
 
