@@ -60,7 +60,7 @@ job "api-service-stage" {
 
       resources {
         cpu = 256
-        memory = 256
+        memory = 512
       }
 
     }

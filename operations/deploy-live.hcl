@@ -60,7 +60,7 @@ job "api-service-live" {
 
       resources {
         cpu = 256
-        memory = 256
+        memory = 2048
       }
 
     }
@@ -83,7 +83,7 @@ job "api-service-live" {
 
       resources {
         cpu = 256
-        memory = 256
+        memory = 512
       }
 
       service {
