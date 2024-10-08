@@ -9,8 +9,6 @@ job "api-service-live" {
     network {
       mode = "bridge"
       port "http-port" {
-        static = 9233
-        to = 80
         host_network = "wireguard"
       }
     }
@@ -60,7 +58,7 @@ job "api-service-live" {
 
       resources {
         cpu = 256
-        memory = 2048
+        memory = 4096
       }
 
     }
@@ -68,13 +66,16 @@ job "api-service-live" {
     task "varnish-cache-live-task" {
       driver = "docker"
 
-      env {
-        VARNISH_HTTP_PORT = "80"
+      template {
+        data = <<EOH
+      	  VARNISH_HTTP_PORT="{{ env `NOMAD_PORT_http_port` }}"
+        EOH
+        destination = "local/file.env"
+        env = true
       }
 
       config {
         image = "varnish"
-        force_pull = true
         volumes = [
           "local/default.vcl:/etc/varnish/default.vcl:ro"
         ]
@@ -83,7 +84,7 @@ job "api-service-live" {
 
       resources {
         cpu = 256
-        memory = 512
+        memory = 1024
       }
 
       service {

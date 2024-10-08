@@ -9,8 +9,6 @@ job "api-service-stage" {
     network {
       mode = "bridge"
       port "http-port" {
-        static = 9133
-        to = 80
         host_network = "wireguard"
       }
     }
@@ -68,8 +66,12 @@ job "api-service-stage" {
     task "varnish-cache-stage-task" {
       driver = "docker"
 
-      env {
-        VARNISH_HTTP_PORT = "80"
+      template {
+        data = <<EOH
+      	  VARNISH_HTTP_PORT="{{ env `NOMAD_PORT_http_port` }}"
+        EOH
+        destination = "local/file.env"
+        env = true
       }
 
       config {
