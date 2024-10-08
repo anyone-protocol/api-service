@@ -99,17 +99,15 @@ job "api-service-stage" {
           "traefik.http.routers.api-stage.tls=true",
           "traefik.http.routers.api-stage.tls.certresolver=atorresolver",
           "traefik.http.routers.api-stage.middlewares=api-stage-ratelimit",
-          "traefik.http.middlewares.api-stage-ratelimit.ratelimit.average=3000",
-          "traefik.http.middlewares.api-stage-ratelimit.ratelimit.period=1m",
-          
+          "traefik.http.middlewares.api-stage-ratelimit.ratelimit.average=1000",
+
           "traefik-ec.enable=true",
           "traefik-ec.http.routers.api-stage.rule=Host(`api-stage.ec.anyone.tech`)",
           "traefik-ec.http.routers.api-stage.entrypoints=https",
           "traefik-ec.http.routers.api-stage.tls=true",
           "traefik-ec.http.routers.api-stage.tls.certresolver=anyoneresolver",
           "traefik-ec.http.routers.api-stage.middlewares=api-stage-ratelimit",
-          "traefik-ec.http.middlewares.api-stage-ratelimit.ratelimit.average=300",
-          "traefik-ec.http.middlewares.api-stage-ratelimit.ratelimit.period=1m",
+          "traefik-ec.http.middlewares.api-stage-ratelimit.ratelimit.average=1000",
         ]
         check {
           name = "Api service check"

@@ -97,17 +97,15 @@ job "api-service-dev" {
           "traefik.http.routers.api-dev.tls=true",
           "traefik.http.routers.api-dev.tls.certresolver=atorresolver",
           "traefik.http.routers.api-dev.middlewares=api-dev-ratelimit",
-          "traefik.http.middlewares.api-dev-ratelimit.ratelimit.average=300",
-          "traefik.http.middlewares.api-dev-ratelimit.ratelimit.period=1m",
-          
+          "traefik.http.middlewares.api-dev-ratelimit.ratelimit.average=1000",
+
           "traefik-ec.enable=true",
           "traefik-ec.http.routers.api-dev.rule=Host(`api-dev.ec.anyone.tech`)",
           "traefik-ec.http.routers.api-dev.entrypoints=https",
           "traefik-ec.http.routers.api-dev.tls=true",
           "traefik-ec.http.routers.api-dev.tls.certresolver=anyoneresolver",
           "traefik-ec.http.routers.api-dev.middlewares=api-dev-ratelimit",
-          "traefik-ec.http.middlewares.api-dev-ratelimit.ratelimit.average=30",
-          "traefik-ec.http.middlewares.api-dev-ratelimit.ratelimit.period=1m",
+          "traefik-ec.http.middlewares.api-dev-ratelimit.ratelimit.average=1000",
         ]
         check {
           name = "Api service check"
