@@ -72,6 +72,7 @@ app.get('/relays/:fingerprint', async (req, res) => {
 
         if (foundRelay) {
             const relay = {
+                nickname: foundRelay.nickname,
                 fingerprint: foundRelay.fingerprint,
                 running: foundRelay.running,
                 consensus_weight: foundRelay.consensus_weight,
@@ -113,6 +114,7 @@ app.get('/relays', async (req, res) => {
 
         if (foundRelays.length > 0) {
             const relays = foundRelays.map((foundRelay : any) => ({
+                nickname: foundRelay.nickname,
                 fingerprint: foundRelay.fingerprint,
                 running: foundRelay.running,
                 consensus_weight: foundRelay.consensus_weight,
