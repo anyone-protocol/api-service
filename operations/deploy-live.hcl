@@ -106,8 +106,7 @@ job "api-service-live" {
           "traefik-ec.http.routers.api-live.tls=true",
           "traefik-ec.http.routers.api-live.tls.certresolver=anyoneresolver",
           "traefik-ec.http.routers.api-live.middlewares=api-live-ratelimit",
-          "traefik-ec.http.middlewares.api-live-ratelimit.ratelimit.average=300",
-          "traefik-ec.http.middlewares.api-live-ratelimit.ratelimit.period=1m",
+          "traefik-ec.http.middlewares.api-live-ratelimit.ratelimit.average=1000",
         ]
         check {
           name = "Api service check"
