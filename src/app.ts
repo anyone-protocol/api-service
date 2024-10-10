@@ -142,8 +142,10 @@ app.get('/relay-map/', async (req, res) => {
         );
 
         const geo = ipAddresses.filter(item => item!== null).map((ip) => geoLiteService.ipToGeo(ip));
-
-        const hexes = geo.map((ll) => h3Service.geoToHex(ll![0], ll![1]));
+        
+        const hexes = geo
+            .filter(ll => ll && ll.length >= 2) // Ensure ll is not null and has at least 2 elements
+            .map((ll) => h3Service.geoToHex(ll![0], ll![1]));
 
         const map: Map<string, number> = new Map();
 
