@@ -110,23 +110,18 @@ app.get('/relays', async (req, res) => {
         const foundRelays = details.relays.filter((relay: { fingerprint: string; }) =>
             fingerprints.includes(relay.fingerprint)
         );
-        console.log('Found relays:', foundRelays);
+        console.log('Found relays:', foundRelays.length);
 
-        if (foundRelays.length > 0) {
-            const relays = foundRelays.map((foundRelay : any) => ({
-                nickname: foundRelay.nickname,
-                fingerprint: foundRelay.fingerprint,
-                running: foundRelay.running,
-                consensus_weight: foundRelay.consensus_weight,
-                observed_bandwidth: foundRelay.observed_bandwidth,
-                measured: foundRelay.measured
-            }));
-            console.log('Result relays:', relays);
-            return res.json(relays);
-        } else {
-            console.log("No relays found");
-            return res.status(404).send('No relays found');
-        }
+        const relays = foundRelays.map((foundRelay : any) => ({
+            nickname: foundRelay.nickname,
+            fingerprint: foundRelay.fingerprint,
+            running: foundRelay.running,
+            consensus_weight: foundRelay.consensus_weight,
+            observed_bandwidth: foundRelay.observed_bandwidth,
+            measured: foundRelay.measured
+        }));
+        console.log('Result relays:', relays);
+        return res.json(relays);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error querying Onionoo');
