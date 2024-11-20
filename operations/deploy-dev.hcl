@@ -60,7 +60,7 @@ job "api-service-dev" {
 
       resources {
         cpu = 256
-        memory = 256
+        memory = 1024
       }
 
     }
