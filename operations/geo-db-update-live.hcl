@@ -1,7 +1,7 @@
-job "api-service-geoip-db-update-job-live" {
+job "geo-db-update-live" {
   datacenters = ["ator-fin"]
   type = "batch"
-  namespace = "ator-network"
+  namespace = "live-services"
   
   periodic {
     crons            = [ "0 3 * * 3,6" ] # every Wed and Sat at 3am
@@ -15,10 +15,6 @@ job "api-service-geoip-db-update-job-live" {
       read_only = false
       source    = "api-service-live"
     }
-    
-    vault {
-      policies = ["geo-ip-maxmind"]
-    }
   
     task "geoip-db-update-script" {
       driver = "docker"
@@ -29,13 +25,23 @@ job "api-service-geoip-db-update-job-live" {
         read_only   = false
       }
 
+      vault {
+        role = "any1-nomad-workloads-controller"
+      }
+
+      identity {
+        name = "vault_default"
+        aud  = ["any1-infra"]
+        ttl  = "1h"
+      }
+      
       template {
         data = <<EOH
-          {{with secret "kv/geo-ip-maxmind"}}
-            LICENSE_KEY="{{.Data.data.SECRET_KEY}}"
+          {{with secret "kv/live-services/geo-db-update-live"}}
+            LICENSE_KEY="{{.Data.data.LICENSE_KEY}}"
           {{end}}
         EOH
-        destination = "secrets/file.env"
+        destination = "secrets/keys.env"
         env         = true
       }
       

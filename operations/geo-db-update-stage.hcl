@@ -1,7 +1,7 @@
-job "api-service-geoip-db-update-job-stage" {
+job "geo-db-update-stage" {
   datacenters = ["ator-fin"]
   type = "batch"
-  namespace = "ator-network"
+  namespace = "stage-services"
   
   periodic {
     crons            = [ "0 3 * * 3,6" ] # every Wed and Sat at 3am
@@ -15,10 +15,6 @@ job "api-service-geoip-db-update-job-stage" {
       read_only = false
       source    = "api-service-stage"
     }
-    
-    vault {
-      policies = ["geo-ip-maxmind"]
-    }
   
     task "geoip-db-update-script" {
       driver = "docker"
@@ -28,11 +24,21 @@ job "api-service-geoip-db-update-job-stage" {
         destination = "/data"
         read_only   = false
       }
+      
+      vault {
+        role = "any1-nomad-workloads-controller"
+      }
+
+      identity {
+        name = "vault_default"
+        aud  = ["any1-infra"]
+        ttl  = "1h"
+      }
 
       template {
         data = <<EOH
-          {{with secret "kv/geo-ip-maxmind"}}
-            LICENSE_KEY="{{.Data.data.SECRET_KEY}}"
+          {{with secret "kv/stage-services/geo-db-update-stage"}}
+            LICENSE_KEY="{{.Data.data.LICENSE_KEY}}"
           {{end}}
         EOH
         destination = "secrets/file.env"

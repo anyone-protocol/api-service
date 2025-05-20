@@ -1,7 +1,7 @@
 job "api-service-live" {
   datacenters = ["ator-fin"]
   type = "service"
-  namespace = "ator-network"
+  namespace = "live-services"
 
   group "api-service-live-group" {
     count = 1
@@ -24,7 +24,7 @@ job "api-service-live" {
 
       template {
         data = <<EOH
-	{{- range nomadService "victoriametrics-db" }}
+	{{- range service "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
         ONIONOO_INSTANCE="10.1.244.1:9290"
@@ -36,7 +36,7 @@ job "api-service-live" {
         GEODATADIR="/usr/src/app/data/node_modules/geoip-lite/data"
       	GEOTMPDIR="/usr/src/app/data/node_modules/geoip-lite/tmp"
             EOH
-        destination = "secrets/file.env"
+        destination = "local/config.env"
         env = true
       }
 
@@ -91,15 +91,7 @@ job "api-service-live" {
         name = "api-service-live"
         port = "http-port"
         tags = [
-          "logging",
-          "traefik.enable=true",
-          "traefik.http.routers.api-live.rule=Host(`api-live.dmz.ator.dev`)",
-          "traefik.http.routers.api-live.entrypoints=https",
-          "traefik.http.routers.api-live.tls=true",
-          "traefik.http.routers.api-live.tls.certresolver=atorresolver",
-          "traefik.http.routers.api-live.middlewares=api-live-ratelimit",
-          "traefik.http.middlewares.api-live-ratelimit.ratelimit.average=1000",
-          
+          "logging",          
           "traefik-ec.enable=true",
           "traefik-ec.http.routers.api-live.rule=Host(`api.ec.anyone.tech`)",
           "traefik-ec.http.routers.api-live.entrypoints=https",
