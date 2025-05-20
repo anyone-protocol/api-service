@@ -27,7 +27,10 @@ job "api-service-stage" {
 	{{- range service "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	{{ end -}}
-        ONIONOO_INSTANCE="10.1.244.1:9190"
+  
+  {{- range service "onionoo-war-live" }}
+        ONIONOO_INSTANCE="{{ .Address }}:{{ .Port }}"
+  {{ end -}}
         ONIONOO_PROTOCOL="http://"
         CLUSTER="local"
         ENV="main"
