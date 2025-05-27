@@ -8,7 +8,6 @@ job "api-service-live" {
     value = "live-services"
   }
 
-
   group "api-service-live-group" {
     count = 1
 
@@ -23,6 +22,34 @@ job "api-service-live" {
       type      = "host"
       read_only = false
       source    = "api-service-live"
+    }
+
+    service {
+      name = "api-service-live"
+      port = "http-port"
+      tags = [
+        "logging",          
+        "traefik-ec.enable=true",
+        "traefik-ec.http.routers.api-live.rule=Host(`api.ec.anyone.tech`)",
+        "traefik-ec.http.routers.api-live.entrypoints=https",
+        "traefik-ec.http.routers.api-live.tls=true",
+        "traefik-ec.http.routers.api-live.tls.certresolver=anyoneresolver",
+        "traefik-ec.http.routers.api-live.middlewares=api-live-ratelimit",
+        "traefik-ec.http.middlewares.api-live-ratelimit.ratelimit.average=1000",
+      ]
+      check {
+        name = "Api service check"
+        type = "tcp"
+        port = "http-port"
+        path = "/"
+        interval = "10s"
+        timeout = "10s"
+        address_mode = "alloc"
+        check_restart {
+          limit = 10
+          grace = "30s"
+        }
+      }
     }
 
     task "api-service-live-task" {
@@ -93,33 +120,6 @@ job "api-service-live" {
       resources {
         cpu = 256
         memory = 1024
-      }
-
-      service {
-        name = "api-service-live"
-        port = "http-port"
-        tags = [
-          "logging",          
-          "traefik-ec.enable=true",
-          "traefik-ec.http.routers.api-live.rule=Host(`api.ec.anyone.tech`)",
-          "traefik-ec.http.routers.api-live.entrypoints=https",
-          "traefik-ec.http.routers.api-live.tls=true",
-          "traefik-ec.http.routers.api-live.tls.certresolver=anyoneresolver",
-          "traefik-ec.http.routers.api-live.middlewares=api-live-ratelimit",
-          "traefik-ec.http.middlewares.api-live-ratelimit.ratelimit.average=1000",
-        ]
-        check {
-          name = "Api service check"
-          type = "tcp"
-          port = "http-port"
-          path = "/"
-          interval = "10s"
-          timeout = "10s"
-          check_restart {
-            limit = 10
-            grace = "30s"
-          }
-        }
       }
 
       template {

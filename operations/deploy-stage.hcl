@@ -24,6 +24,34 @@ job "api-service-stage" {
       source    = "api-service-stage"
     }
 
+    service {
+      name = "api-service-stage"
+      port = "http-port"
+      tags = [
+        "logging",
+        "traefik-ec.enable=true",
+        "traefik-ec.http.routers.api-stage.rule=Host(`api-stage.ec.anyone.tech`)",
+        "traefik-ec.http.routers.api-stage.entrypoints=https",
+        "traefik-ec.http.routers.api-stage.tls=true",
+        "traefik-ec.http.routers.api-stage.tls.certresolver=anyoneresolver",
+        "traefik-ec.http.routers.api-stage.middlewares=api-stage-ratelimit",
+        "traefik-ec.http.middlewares.api-stage-ratelimit.ratelimit.average=1000",
+      ]
+      check {
+        name = "Api service check"
+        type = "tcp"
+        port = "http-port"
+        path = "/"
+        interval = "10s"
+        timeout = "10s"
+        address_mode = "alloc"
+        check_restart {
+          limit = 10
+          grace = "30s"
+        }
+      }
+    }
+
     task "api-service-stage-task" {
       driver = "docker"
 
@@ -94,33 +122,6 @@ job "api-service-stage" {
       resources {
         cpu = 256
         memory = 256
-      }
-
-      service {
-        name = "api-service-stage"
-        port = "http-port"
-        tags = [
-          "logging",
-          "traefik-ec.enable=true",
-          "traefik-ec.http.routers.api-stage.rule=Host(`api-stage.ec.anyone.tech`)",
-          "traefik-ec.http.routers.api-stage.entrypoints=https",
-          "traefik-ec.http.routers.api-stage.tls=true",
-          "traefik-ec.http.routers.api-stage.tls.certresolver=anyoneresolver",
-          "traefik-ec.http.routers.api-stage.middlewares=api-stage-ratelimit",
-          "traefik-ec.http.middlewares.api-stage-ratelimit.ratelimit.average=1000",
-        ]
-        check {
-          name = "Api service check"
-          type = "tcp"
-          port = "http-port"
-          path = "/"
-          interval = "10s"
-          timeout = "10s"
-          check_restart {
-            limit = 10
-            grace = "30s"
-          }
-        }
       }
 
       template {
