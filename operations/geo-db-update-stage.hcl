@@ -3,6 +3,11 @@ job "geo-db-update-stage" {
   type = "batch"
   namespace = "stage-services"
   
+  constraint {
+    attribute = "${meta.pool}"
+    value = "stage"
+  }
+  
   periodic {
     crons            = [ "0 3 * * 3,6" ] # every Wed and Sat at 3am
     prohibit_overlap = true
