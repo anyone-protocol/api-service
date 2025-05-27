@@ -2,6 +2,12 @@ job "api-service-live" {
   datacenters = ["ator-fin"]
   type = "service"
   namespace = "live-services"
+  
+  constraint {
+    attribute = "${meta.pool}"
+    value = "live-services"
+  }
+
 
   group "api-service-live-group" {
     count = 1

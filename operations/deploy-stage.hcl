@@ -2,6 +2,11 @@ job "api-service-stage" {
   datacenters = ["ator-fin"]
   type = "service"
   namespace = "stage-services"
+  
+  constraint {
+    attribute = "${meta.pool}"
+    value = "stage"
+  }
 
   group "api-service-stage-group" {
     count = 1
