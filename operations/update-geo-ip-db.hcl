@@ -26,9 +26,10 @@ job "update-geo-ip-db" {
       driver = "docker"
 
       config {
-        image = "ghcr.io/anyone-protocol/api-service:6c2099f13b5a7386ade2ab2cfeca0f1affe2bfb0"
+        image = "ghcr.io/anyone-protocol/api-service:0aa5a3d035627898612c08225aff95720edcafef"
         command = "npm"
         args = [
+          "run",
           "update-geo-ip-db",
           "license_key=$LICENSE_KEY"
         ]
