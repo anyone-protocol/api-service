@@ -41,10 +41,10 @@ job "geo-db-update-live" {
       }
       
       template {
-        data = <<EOH
-          {{with secret "kv/live-services/geo-db-update-live"}}
-            LICENSE_KEY="{{.Data.data.LICENSE_KEY}}"
-          {{end}}
+        data = <<-EOH
+        {{with secret "kv/live-services/geo-db-update-live"}}
+          LICENSE_KEY="{{.Data.data.LICENSE_KEY}}"
+        {{end}}
         EOH
         destination = "secrets/keys.env"
         env         = true

@@ -35,7 +35,7 @@ job "api-service-stage" {
         "traefik-ec.http.routers.api-stage.tls=true",
         "traefik-ec.http.routers.api-stage.tls.certresolver=anyoneresolver",
         "traefik-ec.http.routers.api-stage.middlewares=api-stage-ratelimit",
-        "traefik-ec.http.middlewares.api-stage-ratelimit.ratelimit.average=1000",
+        "traefik-ec.http.middlewares.api-stage-ratelimit.ratelimit.average=1000"
       ]
       check {
         name = "Api service check"
@@ -56,14 +56,14 @@ job "api-service-stage" {
       driver = "docker"
 
       template {
-        data = <<EOH
-	{{- range service "victoriametrics-db" }}
+        data = <<-EOH
+	      {{- range service "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
-	{{ end -}}
+	      {{ end -}}
   
-  {{- range service "onionoo-war-live" }}
+        {{- range service "onionoo-war-live" }}
         ONIONOO_INSTANCE="{{ .Address }}:{{ .Port }}"
-  {{ end -}}
+        {{ end -}}
         ONIONOO_PROTOCOL="http://"
         CLUSTER="local"
         ENV="main"
@@ -71,7 +71,7 @@ job "api-service-stage" {
         HEXAGON_RESOLUTION="4"
         GEODATADIR="/usr/src/app/data/node_modules/geoip-lite/data"
       	GEOTMPDIR="/usr/src/app/data/node_modules/geoip-lite/tmp"
-            EOH
+        EOH
         destination = "local/config.env"
         env = true
       }
@@ -103,8 +103,8 @@ job "api-service-stage" {
       driver = "docker"
 
       template {
-        data = <<EOH
-      	  VARNISH_HTTP_PORT="{{ env `NOMAD_PORT_http_port` }}"
+        data = <<-EOH
+        VARNISH_HTTP_PORT="{{ env `NOMAD_PORT_http_port` }}"
         EOH
         destination = "local/file.env"
         env = true

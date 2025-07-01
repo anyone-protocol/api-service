@@ -35,7 +35,7 @@ job "api-service-live" {
         "traefik-ec.http.routers.api-live.tls=true",
         "traefik-ec.http.routers.api-live.tls.certresolver=anyoneresolver",
         "traefik-ec.http.routers.api-live.middlewares=api-live-ratelimit",
-        "traefik-ec.http.middlewares.api-live-ratelimit.ratelimit.average=1000",
+        "traefik-ec.http.middlewares.api-live-ratelimit.ratelimit.average=1000"
       ]
       check {
         name = "Api service check"
@@ -56,13 +56,13 @@ job "api-service-live" {
       driver = "docker"
 
       template {
-        data = <<EOH
-	{{- range service "victoriametrics-db" }}
+        data = <<-EOH
+        {{- range service "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
-	{{ end -}}
-  {{- range service "onionoo-war-live" }}
+	      {{ end -}}
+        {{- range service "onionoo-war-live" }}
         ONIONOO_INSTANCE="{{ .Address }}:{{ .Port }}"
-  {{ end -}}
+        {{ end -}}
         ONIONOO_PROTOCOL="http://"
         CLUSTER="local"
         ENV="main"

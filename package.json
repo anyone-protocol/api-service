@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "update-geo-ip-db": "cd node_modules/geoip-lite && npm run-script updatedb"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +31,7 @@
     "express": "^4.19.1",
     "express-validator": "^7.1.0",
     "geoip-lite": "^1.4.10",
-    "h3-js": "^4.1.0"
+    "h3-js": "^4.1.0",
+    "run-script": "^0.1.1"
   }
 }

@@ -1,7 +1,8 @@
-FROM node:14
+FROM node:23-alpine
 WORKDIR /usr/src/app
 COPY package*.json ./
 COPY . .
 RUN npm install && npm run build
+RUN mkdir -p data && cp -r node_modules data
 EXPOSE 3000
-ENTRYPOINT ["sh", "docker-entrypoint.sh"]
+CMD [ "node", "dist/app.js" ]
