@@ -5,7 +5,7 @@ job "geo-db-update-live" {
   
   constraint {
     attribute = "${meta.pool}"
-    value = "live"
+    value = "live-services"
   }
   
   periodic {
