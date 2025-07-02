@@ -26,7 +26,7 @@ job "geo-db-update-stage" {
       driver = "docker"
 
       config {
-        image = "ghcr.io/anyone-protocol/api-service:[[.image_tag]]"
+        image = "ghcr.io/anyone-protocol/api-service:DEPLOY_TAG"
         command = "npm"
         args = [
           "run",
