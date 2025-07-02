@@ -1,15 +1,14 @@
 version: '2.2'
 services:
   api-service:
-    image: api-service:latest
+    image: ghcr.io/anyone-protocol/api-service:latest
     restart: always
+    env_file:
+      - .env
     environment:
-      VICTORIA_METRICS_ADDRESS: "http://host.docker.internal:8428"
-      HEXAGON_RESOLUTION: 4
-      ONIONOO_INSTANCE: "host.docker.internal:8080"
       GEODATADIR: "/usr/src/app/data/node_modules/geoip-lite/data"
       GEOTMPDIR: "/usr/src/app/data/node_modules/geoip-lite/tmp"
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     volumes:
-      - ./data/:/usr/src/app/data 
+      - ./data/:/usr/src/app/data

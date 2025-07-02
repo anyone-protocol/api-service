@@ -5,29 +5,34 @@ job "geo-db-update-live" {
   
   constraint {
     attribute = "${meta.pool}"
-    value = "live-services"
+    value = "live"
   }
   
   periodic {
-    crons            = [ "0 3 * * 3,6" ] # every Wed and Sat at 3am
+    crons            = [ "@weekly" ]
     prohibit_overlap = true
   }
   
-  group "api-service-geoip-db-update-job-live" {
-  	
+  group "geo-db-update-live-group" {
+  	count = 1
+
     volume "api-service-live" {
       type      = "host"
       read_only = false
       source    = "api-service-live"
     }
-  
-    task "geoip-db-update-script" {
+
+    task "geo-db-update-live-task" {
       driver = "docker"
-      
-      volume_mount {
-        volume      = "api-service-live"
-        destination = "/data"
-        read_only   = false
+
+      config {
+        image = "ghcr.io/anyone-protocol/api-service:[[.image_tag]]"
+        command = "npm"
+        args = [
+          "run",
+          "update-geo-ip-db",
+          "license_key=$LICENSE_KEY"
+        ]
       }
 
       vault {
@@ -39,24 +44,26 @@ job "geo-db-update-live" {
         aud  = ["any1-infra"]
         ttl  = "1h"
       }
-      
+
+      volume_mount {
+        volume      = "api-service-live"
+        destination = "/api-service-live"
+        read_only   = false
+      }
+
+      env {
+        GEODATADIR="/api-service-live/geo-ip-db/data"
+        GEOTMPDIR="/api-service-live/tmp"
+      }
+
       template {
         data = <<-EOH
-        {{with secret "kv/live-services/geo-db-update-live"}}
-          LICENSE_KEY="{{.Data.data.LICENSE_KEY}}"
-        {{end}}
+        {{ with secret "kv/live-services/update-geo-ip-db" }}
+        LICENSE_KEY="{{ .Data.data.LICENSE_KEY }}"
+        {{ end }}
         EOH
         destination = "secrets/keys.env"
         env         = true
-      }
-      
-      config {
-        image = "node:14-alpine"
-        args = [
-          "/bin/sh",
-          "-c",
-          "cd /data/node_modules/geoip-lite && npm run-script updatedb license_key=$LICENSE_KEY"
-        ]
       }
     }
   }

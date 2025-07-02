@@ -9,27 +9,32 @@ job "geo-db-update-stage" {
   }
   
   periodic {
-    crons            = [ "0 3 * * 3,6" ] # every Wed and Sat at 3am
+    crons            = [ "@weekly" ]
     prohibit_overlap = true
   }
   
-  group "api-service-geoip-db-update-job-stage" {
-  	
+  group "geo-db-update-stage-group" {
+  	count = 1
+
     volume "api-service-stage" {
       type      = "host"
       read_only = false
       source    = "api-service-stage"
     }
-  
-    task "geoip-db-update-script" {
+
+    task "geo-db-update-stage-task" {
       driver = "docker"
-      
-      volume_mount {
-        volume      = "api-service-stage"
-        destination = "/data"
-        read_only   = false
+
+      config {
+        image = "ghcr.io/anyone-protocol/api-service:[[.image_tag]]"
+        command = "npm"
+        args = [
+          "run",
+          "update-geo-ip-db",
+          "license_key=$LICENSE_KEY"
+        ]
       }
-      
+
       vault {
         role = "any1-nomad-workloads-controller"
       }
@@ -40,23 +45,25 @@ job "geo-db-update-stage" {
         ttl  = "1h"
       }
 
-      template {
-        data = <<EOH
-          {{with secret "kv/stage-services/geo-db-update-stage"}}
-            LICENSE_KEY="{{.Data.data.LICENSE_KEY}}"
-          {{end}}
-        EOH
-        destination = "secrets/file.env"
-        env         = true
+      volume_mount {
+        volume      = "api-service-stage"
+        destination = "/api-service-stage"
+        read_only   = false
       }
-      
-      config {
-        image = "node:14-alpine"
-        args = [
-          "/bin/sh",
-          "-c",
-          "cd /data/node_modules/geoip-lite && npm run-script updatedb license_key=$LICENSE_KEY"
-        ]
+
+      env {
+        GEODATADIR="/api-service-stage/geo-ip-db/data"
+        GEOTMPDIR="/api-service-stage/tmp"
+      }
+
+      template {
+        data = <<-EOH
+        {{ with secret "kv/stage-services/update-geo-ip-db" }}
+        LICENSE_KEY="{{ .Data.data.LICENSE_KEY }}"
+        {{ end }}
+        EOH
+        destination = "secrets/keys.env"
+        env         = true
       }
     }
   }
