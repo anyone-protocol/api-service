@@ -77,7 +77,7 @@ job "api-service-live" {
 
       volume_mount {
         volume      = "api-service-live"
-        destination = "/usr/src/app/data"
+        destination = "/api-service-live"
         read_only   = false
       }
 
