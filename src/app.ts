@@ -163,23 +163,39 @@ app.get('/fingerprint-map/', async (req, res) => {
         // Fetch relay details from Onionoo
         const details = await onionooService.details();
 
-        // Create a map-like object for the result
-        const result: Record<string, { hexId: string; coordinates: number[] }> = {};
+        // Create a map-like object for the result with enhanced geolocation data
+        const result: Record<string, {
+            hexId: string;
+            coordinates: number[];
+            countryCode?: string;
+            countryName?: string;
+            regionName?: string;
+            cityName?: string;
+            asNumber?: string;
+            asName?: string;
+        }> = {};
 
         details.relays
             .filter((relay: any) => relay.or_addresses && relay.or_addresses.length > 0) // Ensure relay has OR addresses
             .forEach((relay: any) => {
                 const ip = relay.or_addresses[0].split(':')[0]; // Extract the IP address
 
-                const geo = ip ? geoLiteService.ipToGeo(ip) : null; // Convert IP to geo
-                if (!geo || geo.length < 2) return; // Skip if geo is invalid
+                // Get comprehensive geolocation data
+                const geoData = ip ? geoLiteService.ipToGeoData(ip) : null;
+                if (!geoData || !geoData.coordinates || geoData.coordinates.length < 2) return; // Skip if geo is invalid
 
-                const hexId = h3Service.geoToHex(geo[0], geo[1]); // Get H3 hex ID from coordinates
+                const hexId = h3Service.geoToHex(geoData.coordinates[0], geoData.coordinates[1]); // Get H3 hex ID from coordinates
                 const coordinates = h3Service.hexToGeo(hexId); // Get center coordinates for the hex ID
 
                 result[relay.fingerprint] = {
                     hexId,
-                    coordinates
+                    coordinates,
+                    countryCode: geoData.countryCode,
+                    countryName: geoData.countryName,
+                    regionName: geoData.regionName,
+                    cityName: geoData.cityName,
+                    asNumber: geoData.asNumber,
+                    asName: geoData.asName
                 };
             });
 

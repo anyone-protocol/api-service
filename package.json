@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "start": "node dist/app.js",
     "test": "jest --coverage",
-    "update-geo-ip-db": "cd node_modules/geoip-lite && npm run-script updatedb"
+    "update-geo-ip-db": "node scripts/update-geolite-db.js"
   },
   "keywords": [],
   "author": "",
@@ -23,14 +24,13 @@
     "typescript": "^5.4.3"
   },
   "dependencies": {
+    "@maxmind/geoip2-node": "^6.1.0",
     "@types/express": "^4.17.21",
-    "@types/geoip-lite": "^1.4.4",
     "axios": "^1.6.8",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "express": "^4.19.1",
     "express-validator": "^7.1.0",
-    "geoip-lite": "^1.4.10",
     "h3-js": "^4.1.0",
     "run-script": "^0.1.1"
   }
