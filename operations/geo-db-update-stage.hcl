@@ -30,8 +30,7 @@ job "geo-db-update-stage" {
         command = "npm"
         args = [
           "run",
-          "update-geo-ip-db",
-          "license_key=$LICENSE_KEY"
+          "update-geo-ip-db"
         ]
       }
 

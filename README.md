@@ -38,6 +38,34 @@ Example:
 
 Will return the total relays for the last 3 days with interval of 12 hours.
 
+# Setup: GeoLite2 Database Download
+
+This service requires MaxMind GeoLite2 databases for geolocation and ASN lookups. You must download and update these databases before running the API service.
+
+**To download/update the databases:**
+
+1. Obtain a MaxMind license key from https://www.maxmind.com/en/geolite2/signup
+2. Set your license key in a `.env` file or as an environment variable:
+   - `.env` file example:
+     ```
+     LICENSE_KEY=your_maxmind_license_key
+     ```
+   - Or export it in your shell:
+     ```bash
+     export LICENSE_KEY=your_maxmind_license_key
+     ```
+3. (Optional) Set `GEODATADIR` to specify the target directory for the databases (default: `/usr/local/share/GeoIP`).
+4. Run the update script:
+   ```bash
+   npm run update-geo-ip-db
+   # or
+   npm run update-geo-ip-db license_key=your_maxmind_license_key
+   ```
+
+This will download and install the latest GeoLite2 City, ASN, and Country databases. You must restart the API service after updating the databases.
+
+---
+
 ## Relay search
 
 There is also a relay search endpoint available on each environment:
@@ -164,3 +192,39 @@ Example of request body:
     ]
 }
 ```
+
+# Fingerprint map
+
+This endpoint returns a map of all relays by fingerprint, including enhanced geolocation and ASN data.
+
+- **GET** `/fingerprint-map/`
+
+Each entry contains:
+- `hexId`: H3 hexagon cell ID for the relay location
+- `coordinates`: `[latitude, longitude]` (center of the hex cell)
+- `countryCode`: ISO country code
+- `countryName`: Country name
+- `regionName`: Region or state name
+- `cityName`: City name
+- `asNumber`: Autonomous System Number (ASN)
+- `asName`: ASN organization name
+
+Example response:
+
+```json
+{
+  "000A10D43011EA4928A35F610405F92B4433B4DC": {
+    "hexId": "8029fffffffffff",
+    "coordinates": [40.1317, -124.7607],
+    "countryCode": "US",
+    "countryName": "United States",
+    "regionName": "California",
+    "cityName": "San Jose",
+    "asNumber": "7018",
+    "asName": "ATT-INTERNET4"
+  },
+  ...
+}
+```
+
+This endpoint is used for geolocation and network analysis of all known relays.
