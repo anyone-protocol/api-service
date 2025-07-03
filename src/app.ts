@@ -63,12 +63,10 @@ app.get('/average-bandwidth-rate-latest', async (req, res) => {
 app.get('/relays/:fingerprint', async (req, res) => {
     try {
         const details = await onionooService.details();
-        console.log('Details:', details);
 
         const foundRelay = details.relays.find((relay: { fingerprint: string; }) =>
             relay.fingerprint === req.params.fingerprint
         );
-        console.log('Found relay:', foundRelay);
 
         if (foundRelay) {
             const relay = {
@@ -79,10 +77,8 @@ app.get('/relays/:fingerprint', async (req, res) => {
                 observed_bandwidth: foundRelay.observed_bandwidth,
                 measured: foundRelay.measured
             };
-            console.log('Relay:', relay);
             return res.json(relay);
         } else {
-            console.log("Relay not found");
             return res.status(404).send('Relay not found');
         }
     } catch (error) {
@@ -110,7 +106,6 @@ app.get('/relays', async (req, res) => {
         const foundRelays = details.relays.filter((relay: { fingerprint: string; }) =>
             fingerprints.includes(relay.fingerprint)
         );
-        console.log('Found relays:', foundRelays.length);
 
         const relays = foundRelays.map((foundRelay : any) => ({
             nickname: foundRelay.nickname,
@@ -120,7 +115,6 @@ app.get('/relays', async (req, res) => {
             observed_bandwidth: foundRelay.observed_bandwidth,
             measured: foundRelay.measured
         }));
-        console.log('Result relays:', relays);
         return res.json(relays);
     } catch (error) {
         console.error(error);
@@ -138,13 +132,9 @@ app.get('/relay-map/', async (req, res) => {
 
         const geo = ipAddresses.filter(item => item!== null).map((ip) => geoLiteService.ipToGeo(ip));
 
-        console.log("Geo items size:", geo.length);
-
         const hexes = geo
             .filter(ll => ll && ll.length >= 2) // Ensure ll is not null and has at least 2 elements
             .map((ll) => h3Service.geoToHex(ll![0], ll![1]));
-
-        console.log("Hexes items size:", hexes.length);
 
         const map: Map<string, number> = new Map();
 
@@ -223,8 +213,6 @@ const hardware_relay_validation_rules = [
 
 app.post('/hardware', hardware_relay_validation_rules, async (req: any, res: any) => {
     const hardwareInfo: HardwareInfo = req.body;
-  
-    console.log('Hardware info: ', hardwareInfo);
 
     const errors = validationResult(req);
 
@@ -244,13 +232,11 @@ function buildQuery(metric: string): string {
 async function handleQuery(query: string, res: any) {
     try {
         const vmRawData = await vmService.query(query);
-        console.log('VM RAW DATA:', vmRawData);
 
         const mappedData = vmRawData.data.result.reduce((acc: any, item: any) => {
             acc[item.metric.status] = item.value[1];
             return acc;
         }, {});
-        console.log('MAPPED DATA:', mappedData);
 
         res.json(mappedData);
     } catch (error) {
@@ -266,13 +252,11 @@ async function handleQueryRange(query: string, params: QueryString.ParsedQs, res
         const interval = String(params.interval ?? INTERVAL);
 
         const vmRawData = await vmService.query_range(query, from, to, interval);
-        console.log(vmRawData);
 
         const mappedData = vmRawData.data.result.reduce((acc: any, item: any) => {
             acc[item.metric.status] = item.values;
             return acc;
         }, {});
-        console.log(mappedData);
 
         res.json(mappedData);
     } catch (error) {
