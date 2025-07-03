@@ -59,18 +59,18 @@ job "api-service-live" {
         data = <<-EOH
         {{- range service "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
-	      {{ end -}}
+	      {{- end }}
         {{- range service "onionoo-war-live" }}
         ONIONOO_INSTANCE="{{ .Address }}:{{ .Port }}"
-        {{ end -}}
+        {{- end }}
         ONIONOO_PROTOCOL="http://"
         CLUSTER="local"
         ENV="main"
         JOB="consulagentonionoo"
         HEXAGON_RESOLUTION="4"
-        GEODATADIR="/usr/src/app/data/node_modules/geoip-lite/data"
-      	GEOTMPDIR="/usr/src/app/data/node_modules/geoip-lite/tmp"
-            EOH
+        GEODATADIR="/api-service-live/geo-ip-db/data"
+        GEOTMPDIR="/api-service-live/tmp"
+        EOH
         destination = "local/config.env"
         env = true
       }
