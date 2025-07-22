@@ -93,6 +93,11 @@ job "api-service-live" {
       config {
         image = "ghcr.io/anyone-protocol/api-service:DEPLOY_TAG"
         force_pull = true
+        command = "node"
+        args = [
+          "--max-http-header-size", "80000",
+          "dist/app.js"
+        ]
       }
 
       service {
