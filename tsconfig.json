@@ -7,6 +7,6 @@
     "esModuleInterop": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "scripts/**/*.ts"],
+  "include": ["src/**/*.ts", "shim.d.ts", "scripts/**/*.ts"],
   "exclude": ["node_modules"]
 }

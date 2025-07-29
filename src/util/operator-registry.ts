@@ -31,19 +31,3 @@ export async function getOperatorRegistryState(
 
   return state
 }
-
-export async function readOperatorAddressesFromFile(
-  dataDir: string
-): Promise<string[]> {
-  const operatorAddressesFile = `${dataDir}/operator-addresses.json`
-  try {
-    const fileContent = await fs.readFile(operatorAddressesFile, 'utf-8')
-    return JSON.parse(fileContent) as string[]
-  } catch (error) {
-    logger.error(
-      `Failed to read operator addresses from file: ${operatorAddressesFile}`,
-      error
-    )
-    throw new Error(`Failed to read operator addresses from file!`)
-  }
-}

@@ -8,12 +8,16 @@ import dotenv from 'dotenv';
 import QueryString from 'qs';
 import { H3Service } from './H3Service';
 import { GeoLiteService } from './GeoLiteService';
+import { OperatorRegistryService } from './operator-registry.service';
+import { UnstoppableDomainsService } from './unstoppable-domains.service';
+import mongoose from 'mongoose';
 dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 const PORT = process.env.PORT ?? 3000;
+
 const vmService = new VictoriaMetricsService(process.env.VICTORIA_METRICS_ADDRESS as string);
 
 const CLUSTER = process.env.CLUSTER ?? 'local';
@@ -35,6 +39,9 @@ const AVERAGE_BANDWIDTH_RATE_METRIC = 'average_bandwidth_rate';
 const resolution = Number(process.env.HEXAGON_RESOLUTION) ?? 4;
 const h3Service = new H3Service(resolution);
 const geoLiteService = new GeoLiteService();
+
+const operatorRegistryService = new OperatorRegistryService();
+const unstoppableDomainsService = new UnstoppableDomainsService();
 
 app.get('/total-relays', async (req, res) => {
     await handleQueryRange(buildQuery(TOTAL_RELAYS_METRIC), req.query, res);
@@ -290,8 +297,31 @@ class HexInfo {
     ) {}
 }
 
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-});
+app.get('/operators', async (req, res) => {
+    try {
+        const operators = await operatorRegistryService.getOperators();
+        return res.json(operators);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error querying operators');
+    }
+})
+
+const bootstrap = async () => {
+    try {
+        const mongodbUri = process.env.MONGO_URI ||
+            'mongodb://localhost:27017'
+        console.log(`Connecting to MongoDB at [${mongodbUri}]`);
+        await mongoose.connect(mongodbUri);
+        app.listen(
+            PORT,
+            () => console.log(`Server running at http://localhost:${PORT}`)
+        );
+    } catch (error) {
+        console.error('Error during bootstrap:', error);
+    }
+}
+
+bootstrap()
 
 export { app };

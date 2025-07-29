@@ -1,4 +1,3 @@
-version: '2.2'
 services:
   api-service:
     image: ghcr.io/anyone-protocol/api-service:latest
@@ -12,3 +11,10 @@ services:
       - "${PORT:-3000}:3000"
     volumes:
       - ./data/:/usr/src/app/data
+  mongodb:
+    image: mongo:8.0.12
+    restart: always
+    ports:
+      - "${MONGODB_PORT:-27017}:27017"
+    volumes:
+      - ./data/mongodb:/data/db

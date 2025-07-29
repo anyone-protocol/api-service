@@ -2,8 +2,7 @@ import 'dotenv/config'
 import axios from 'axios'
 import { ethers } from 'ethers'
 import fs from 'fs/promises'
-import { logger } from './util/logger'
-import { readOperatorAddressesFromFile } from './util/operator-registry'
+import { logger } from '../src/util/logger'
 
 type MatchingDomain = {
   tokenId: string
@@ -20,7 +19,7 @@ const abi = [
   'function ownerOf(uint256 tokenId) view returns (address)'
 ]
 
-async function updateOperatorDomains() {
+async function bootstrap() {
   const unsRegistryAddress = process.env.UNS_REGISTRY_ADDRESS || ''
   if (!unsRegistryAddress) {
     throw new Error('Missing UNS_REGISTRY_ADDRESS!')
@@ -58,42 +57,70 @@ async function updateOperatorDomains() {
   }
   logger.info(`Using data directory [${dataDir}]`)
 
+  return {
+    unsRegistryAddress,
+    unsMetadataUrl,
+    unsTld,
+    unsStartBlock,
+    jsonRpcUrl,
+    dataDir
+  }
+}
+
+async function updateOperatorDomains() {
+  const {
+    unsRegistryAddress,
+    unsMetadataUrl,
+    unsTld,
+    unsStartBlock,
+    jsonRpcUrl,
+    dataDir
+  } = await bootstrap()
+
   const provider = new ethers.JsonRpcProvider(jsonRpcUrl)
   const contract = new ethers.Contract(unsRegistryAddress, abi, provider)
 
-  const newKeyFilter = contract.filters.NewKey()
+  const newKeyFilter = contract.filters.NewKey(null, null, 'ipfs.html.value')
   logger.info(
     `Querying NewKey events from block [${unsStartBlock}]`
   )
-  const newKeyEvents = await contract.queryFilter(newKeyFilter, unsStartBlock)
+  const newKeyEvents = (await contract.queryFilter(newKeyFilter, unsStartBlock))
+    .filter(event => event instanceof ethers.EventLog)
   logger.info(
     `Found [${newKeyEvents.length}] NewKey events ` +
-      `starting from block ${unsStartBlock}.`
+      `starting from block ${unsStartBlock} with key [ipfs.html.value].`
   )
-  const newKeyEventsSettingMetadata = newKeyEvents
-    .filter(event => event instanceof ethers.EventLog)
-    .filter(event => event.args.key === 'ipfs.html.value')
+
   logger.info(
-    `Found [${newKeyEventsSettingMetadata.length}] NewKey events ` +
-      `with key [ipfs.html.value].`
+    `Saving NewKey events to file [${dataDir}/new-key-events.json]...`
+  )
+  await fs.writeFile(
+    `${dataDir}/new-key-events.json`,
+    JSON.stringify(newKeyEvents, null, 2)
+  )
+  logger.info(
+    `Saved NewKey events to file [${dataDir}/new-key-events.json].`
   )
 
   const matchingDomains: MatchingDomain[] = []
-  for (const event of newKeyEventsSettingMetadata) {
-    const sleepTime = 2000
+  for (let i = 0; i < newKeyEvents.length; i++) {
+    const event = newKeyEvents[i]
+    logger.info(
+      `Processing NewKey event ` +
+        `[${i + 1}/${newKeyEvents.length}] ` +
+        `with transaction hash [${event.transactionHash}]`
+    )
+
+    const sleepTime = 1000
     logger.info(
       `Sleeping for ${sleepTime}ms before processing next NewKey event`
     )
     await new Promise((resolve) => setTimeout(resolve, sleepTime))
 
-    if (!(event instanceof ethers.EventLog)) {
-      continue
-    }
     const { tokenId, keyIndex, key } = event.args || {}
     if (tokenId) {
       logger.info(
-        `NewKey event: Token ID [${tokenId.toString()}], ` +
-          `Key Index [${JSON.stringify(keyIndex)}], Key [${key}]`
+        `NewKey event: Token ID [${tokenId.toString()}], Key [${key}]`
       )
       const result = await axios.get(`${unsMetadataUrl}/${tokenId.toString()}`)
       if (result.status === 200) {
@@ -128,6 +155,17 @@ async function updateOperatorDomains() {
   }
   logger.info(
     `Found [${matchingDomains.length}] matching domains with TLD [${unsTld}].`
+  )
+
+  logger.info(
+    `Saving matching domains to file [${dataDir}/matching-domains.json]...`
+  )
+  await fs.writeFile(
+    `${dataDir}/matching-domains.json`,
+    JSON.stringify(matchingDomains, null, 2)
+  )
+  logger.info(
+    `Saved matching domains to file [${dataDir}/matching-domains.json].`
   )
 
   logger.info(`Checking ownership of matching domains`)
@@ -170,7 +208,7 @@ updateOperatorDomains()
     logger.info('Operator addresses updated successfully!')
     process.exit(0)
   })
-  .catch((error) => {
+  .catch(error => {
     logger.error('Error updating operator addresses:', error)
     process.exit(1)
   })

@@ -1,0 +1,66 @@
+job "discover-new-key-events-stage" {
+  datacenters = ["ator-fin"]
+  type = "batch"
+  namespace = "stage-services"
+  
+  constraint {
+    attribute = "${meta.pool}"
+    value = "stage"
+  }
+  
+  periodic {
+    crons            = [ "@hourly" ]
+    prohibit_overlap = true
+  }
+  
+  group "discover-new-key-events-stage-group" {
+  	count = 1
+
+    task "discover-new-key-events-stage-task" {
+      driver = "docker"
+
+      config {
+        image = "ghcr.io/anyone-protocol/api-service:${VERSION}"
+        entrypoint = [ "npx" ]
+        command = "tsx"
+        args = [ "scripts/discover-new-key-events.ts" ]
+      }
+
+      vault {
+        role = "any1-nomad-workloads-controller"
+      }
+
+      identity {
+        name = "vault_default"
+        aud  = ["any1-infra"]
+        ttl  = "1h"
+      }
+
+      env {
+        VERSION="DEPLOY_TAG"
+        UNS_START_BLOCK=32615764
+        UNS_REGISTRY_ADDRESS="0xF6c1b83977DE3dEffC476f5048A0a84d3375d498"
+      }
+
+      template {
+        data = <<-EOH
+        {{ with secret "kv/stage-services/discover-new-key-events-stage" }}
+        JSON_RPC_URL="https://base-mainnet.infura.io/v3/{{ .Data.data.INFURA_API_KEY_0 }}"
+        {{ end }}
+        EOH
+        destination = "secrets/keys.env"
+        env         = true
+      }
+
+      template {
+        data = <<-EOH
+        {{- range service "validator-stage-mongo" }}
+        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-stage"
+        {{- end }}
+        EOH
+        destination = "local/config.env"
+        env         = true
+      }
+    }
+  }
+}
