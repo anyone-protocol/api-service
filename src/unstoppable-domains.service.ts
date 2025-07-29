@@ -34,7 +34,7 @@ export class UnstoppableDomainsService {
     logger.info('UnstoppableDomainsService initialized.')
   }
 
-  async queryNewKeyEvents(from: ethers.BlockTag) {
+  async queryNewKeyEvents(from: ethers.BlockTag): Promise<ethers.EventLog[]> {
     const filter = this.unsRegistryContract.filters.NewKey()
     logger.info(`Querying NewKey events from block [${from}]`)
     const newKeyEvents = (
@@ -44,12 +44,15 @@ export class UnstoppableDomainsService {
       )
     )
       .filter(event => event instanceof ethers.EventLog)
-      .filter(event => event.args?.key === 'ipfs.html.value')
+      .filter(
+        event => event instanceof ethers.EventLog &&
+          event.args.key === 'ipfs.html.value'
+      )
     logger.info(
       `Found [${newKeyEvents.length}] NewKey events ` +
         `starting from block ${from} with key [ipfs.html.value].`
     )
 
-    return newKeyEvents
+    return newKeyEvents as ethers.EventLog[]
   }
 }

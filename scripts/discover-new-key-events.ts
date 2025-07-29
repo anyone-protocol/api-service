@@ -7,6 +7,7 @@ import {
   DiscoverNewKeyEventsState
 } from '../src/schema/discover-new-key-events-state.schema'
 
+
 async function discoverNewKeyEvents() {
   const mongodbUri = process.env.MONGO_URI || 'mongodb://localhost:27017'
   console.log(`Connecting to MongoDB at [${mongodbUri}]`)
@@ -32,9 +33,9 @@ async function discoverNewKeyEvents() {
       blockNumber: event.blockNumber,
       blockHash: event.blockHash,
       transactionHash: event.transactionHash,
-      tokenId: event.args?.tokenId,
-      keyIndex: event.args?.keyIndex?.toString(),
-      key: event.args?.key
+      tokenId: event.args.tokenId,
+      keyIndex: event.args.keyIndex?.toString(),
+      key: event.args.key
     })
   })
 

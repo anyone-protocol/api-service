@@ -104,7 +104,7 @@ async function updateOperatorDomains() {
 
   const matchingDomains: MatchingDomain[] = []
   for (let i = 0; i < newKeyEvents.length; i++) {
-    const event = newKeyEvents[i]
+    const event = newKeyEvents[i] as ethers.EventLog
     logger.info(
       `Processing NewKey event ` +
         `[${i + 1}/${newKeyEvents.length}] ` +
