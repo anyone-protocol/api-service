@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/app.js",
+    "start": "node dist/src/app.js",
     "test": "jest --coverage",
     "update-geo-ip-db": "node scripts/update-geolite-db.js"
   },

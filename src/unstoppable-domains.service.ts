@@ -3,6 +3,7 @@ import { unsRegistryAbi } from './schema/uns-registry.abi'
 import { logger } from './util/logger'
 import axios from 'axios'
 import { UNSMetadata } from './schema/uns-metadata.interface'
+import { UNSDomain } from './schema/uns-domain.schema'
 
 export class UnstoppableDomainsService {
   private readonly jsonRpcUrl: string
@@ -105,5 +106,25 @@ export class UnstoppableDomainsService {
       return null
     }
     return { tokenId, owner }
+  }
+
+  async getAnyoneDomains() {
+    logger.info('Fetching anyone domains with owners...')
+    const anyoneDomains = await UNSDomain.find({
+      tld: 'anyone',
+      owner: { $exists: true }
+    })
+    if (anyoneDomains.length === 0) {
+      logger.info('No anyone domains found.')
+      return []
+    }
+    logger.info(`Found ${anyoneDomains.length} anyone domains.`)
+
+    return anyoneDomains.map(domain => ({
+      tokenId: domain.tokenId,
+      name: domain.name,
+      owner: domain.owner,
+      tld: domain.tld
+    }))
   }
 }

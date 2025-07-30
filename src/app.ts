@@ -307,6 +307,16 @@ app.get('/operators', async (req, res) => {
     }
 })
 
+app.get('/anyone-domains', async (req, res) => {
+    try {
+        const anyoneDomains = await unstoppableDomainsService.getAnyoneDomains();
+        return res.json(anyoneDomains);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error querying anyone domains');
+    }
+})
+
 const bootstrap = async () => {
     try {
         const mongodbUri = process.env.MONGO_URI ||
