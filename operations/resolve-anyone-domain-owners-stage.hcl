@@ -25,7 +25,7 @@ job "resolve-anyone-domain-owners-stage" {
         image = "ghcr.io/anyone-protocol/api-service:${VERSION}"
         entrypoint = [ "npx" ]
         command = "tsx"
-        args = [ "resolve-anyone-domain-owners.ts" ]
+        args = [ "scripts/resolve-anyone-domain-owners.ts" ]
       }
 
       vault {
