@@ -29,6 +29,11 @@ const NewKeyEventSchema = new mongoose.Schema({
   key: {
     type: String,
     required: true
+  },
+  isProcessed: {
+    type: Boolean,
+    required: true,
+    default: false
   }
 })
 

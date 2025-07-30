@@ -7,9 +7,11 @@ import {
   DiscoverNewKeyEventsState
 } from '../src/schema/discover-new-key-events-state.schema'
 
-
 async function discoverNewKeyEvents() {
-  const mongodbUri = process.env.MONGO_URI || 'mongodb://localhost:27017'
+  const mongodbUri = process.env.MONGO_URI
+  if (!mongodbUri) {
+    throw new Error('Missing MONGO_URI!')
+  }
   console.log(`Connecting to MongoDB at [${mongodbUri}]`)
   await mongoose.connect(mongodbUri)
   const unsService = new UnstoppableDomainsService()

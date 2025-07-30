@@ -3,16 +3,18 @@ job "discover-new-key-events-stage" {
   type = "batch"
   namespace = "stage-services"
   
+  reschedule { attempts = 0 }
+
   constraint {
     attribute = "${meta.pool}"
     value = "stage"
   }
-  
+
   periodic {
     crons            = [ "@hourly" ]
     prohibit_overlap = true
   }
-  
+
   group "discover-new-key-events-stage-group" {
   	count = 1
 
@@ -60,6 +62,11 @@ job "discover-new-key-events-stage" {
         EOH
         destination = "local/config.env"
         env         = true
+      }
+
+      restart {
+        attempts = 0
+        mode     = "fail"
       }
     }
   }
