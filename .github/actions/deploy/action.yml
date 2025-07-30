@@ -25,10 +25,12 @@ runs:
         sed -i 's/DEPLOY_TAG/${{ inputs.docker-tag }}/g' operations/geo-db-update-${{ inputs.environment }}.hcl
         sed -i 's/DEPLOY_TAG/${{ inputs.docker-tag }}/g' operations/discover-new-key-events-${{ inputs.environment }}.hcl
         sed -i 's/DEPLOY_TAG/${{ inputs.docker-tag }}/g' operations/discover-anyone-domains-${{ inputs.environment }}.hcl
+        sed -i 's/DEPLOY_TAG/${{ inputs.docker-tag }}/g' operations/resolve-anyone-domain-owners-${{ inputs.environment }}.hcl
         curl -L https://releases.hashicorp.com/nomad/1.8.3/nomad_1.8.3_linux_amd64.zip -o nomad.zip
         unzip nomad.zip
         ./nomad job run operations/geo-db-update-${{ inputs.environment }}.hcl
         ./nomad job run operations/discover-new-key-events-${{ inputs.environment }}.hcl
         ./nomad job run operations/discover-anyone-domains-${{ inputs.environment }}.hcl
+        ./nomad job run operations/resolve-anyone-domain-owners-${{ inputs.environment }}.hcl
         ./nomad job run operations/deploy-${{ inputs.environment }}.hcl
 
