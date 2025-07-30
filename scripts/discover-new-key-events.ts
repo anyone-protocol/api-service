@@ -6,18 +6,31 @@ import { logger } from '../src/util/logger'
 import {
   DiscoverNewKeyEventsState
 } from '../src/schema/discover-new-key-events-state.schema'
+import { ethers } from 'ethers'
 
 async function discoverNewKeyEvents() {
   const mongodbUri = process.env.MONGO_URI
   if (!mongodbUri) {
     throw new Error('Missing MONGO_URI!')
   }
+  const jsonRpcUrl = process.env.JSON_RPC_URL || ''
+  if (!jsonRpcUrl) {
+    throw new Error('Missing JSON_RPC_URL!')
+  }
+  logger.info(`Using JSON-RPC URL [${jsonRpcUrl}]`)
   console.log(`Connecting to MongoDB at [${mongodbUri}]`)
   await mongoose.connect(mongodbUri)
+  const provider = new ethers.JsonRpcProvider(jsonRpcUrl)
   const unsService = new UnstoppableDomainsService()
   const fromBlock = await getLastSafeCompleteBlockNumber()
-  logger.info(`Starting discovery from block [${fromBlock}]`)
-  const newKeyEvents = await unsService.queryNewKeyEvents(fromBlock)
+  const currentBlock = await provider.getBlockNumber()
+  logger.info(
+    `Starting discovery from block [${fromBlock}] to [${currentBlock}]`
+  )
+  const newKeyEvents = await unsService.queryNewKeyEvents(
+    fromBlock,
+    currentBlock
+  )
 
   if (newKeyEvents.length === 0) {
     logger.info('No new key events found.')
@@ -25,11 +38,7 @@ async function discoverNewKeyEvents() {
   }
 
   logger.info(`Found ${newKeyEvents.length} new key events.`)
-  let lastBlockNumber = 0
   const newKeyEventDocuments = newKeyEvents.map(event => {
-    if (event.blockNumber > lastBlockNumber) {
-      lastBlockNumber = event.blockNumber
-    }
     return new NewKeyEvent({
       eventName: 'NewKeyEvent',
       blockNumber: event.blockNumber,
@@ -44,9 +53,9 @@ async function discoverNewKeyEvents() {
   await NewKeyEvent.insertMany(newKeyEventDocuments)
   logger.info(`Saved ${newKeyEventDocuments.length} new key events to MongoDB.`)
 
-  await setLastSafeCompleteBlockNumber(lastBlockNumber)
+  await setLastSafeCompleteBlockNumber(currentBlock)
   logger.info(
-    `Updated last safe complete block number to [${lastBlockNumber}].`
+    `Updated last safe complete block number to [${currentBlock}].`
   )
 }
 

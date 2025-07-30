@@ -1,10 +1,14 @@
 import { Contract, ethers, JsonRpcProvider } from 'ethers'
 import { unsRegistryAbi } from './schema/uns-registry.abi'
 import { logger } from './util/logger'
+import axios from 'axios'
+import { UNSMetadata } from './schema/uns-metadata.interface'
 
 export class UnstoppableDomainsService {
   private readonly jsonRpcUrl: string
   private readonly unsRegistryAddress: string
+  private readonly unsMetadataUrl: string
+  public readonly unsTld: string
 
   private provider: JsonRpcProvider
   private unsRegistryContract: Contract
@@ -24,6 +28,18 @@ export class UnstoppableDomainsService {
     }
     logger.info(`Using UNS registry address [${this.unsRegistryAddress}]`)
 
+    this.unsMetadataUrl = process.env.UNS_METADATA_URL || ''
+    if (!this.unsMetadataUrl) {
+      throw new Error('Missing UNS_METADATA_URL!')
+    }
+    logger.info(`Using UNS metadata URL [${this.unsMetadataUrl}]`)
+
+    this.unsTld = process.env.UNS_TLD || ''
+    if (!this.unsTld) {
+      throw new Error('Missing UNS_TLD!')
+    }
+    logger.info(`Using UNS TLD [${this.unsTld}]`)
+
     this.provider = new JsonRpcProvider(this.jsonRpcUrl)
     this.unsRegistryContract = new Contract(
       this.unsRegistryAddress,
@@ -34,13 +50,17 @@ export class UnstoppableDomainsService {
     logger.info('UnstoppableDomainsService initialized.')
   }
 
-  async queryNewKeyEvents(from: ethers.BlockTag): Promise<ethers.EventLog[]> {
+  async queryNewKeyEvents(
+    from: ethers.BlockTag,
+    to?: ethers.BlockTag
+  ): Promise<ethers.EventLog[]> {
     const filter = this.unsRegistryContract.filters.NewKey()
     logger.info(`Querying NewKey events from block [${from}]`)
     const newKeyEvents = (
       await this.unsRegistryContract.queryFilter(
         filter,
-        from
+        from,
+        to
       )
     )
       .filter(event => event instanceof ethers.EventLog)
@@ -54,5 +74,36 @@ export class UnstoppableDomainsService {
     )
 
     return newKeyEvents as ethers.EventLog[]
+  }
+
+  async getUnsMetadata(tokenId: string): Promise<UNSMetadata | null> {
+    logger.info(`Fetching metadata for token ID [${tokenId}]`)
+    const response = await axios.get(`${this.unsMetadataUrl}/${tokenId}`)
+    const metadata: Partial<UNSMetadata> = response.data
+    if (typeof metadata.name === 'string') {
+      logger.info(`Got metadata for token ID [${tokenId}]: ${metadata.name}`)
+
+      return {
+        tokenId,
+        name: metadata.name
+      }
+    }
+
+    logger.error(
+      `Failed to fetch metadata for token ID [${tokenId}]: ` +
+        `HTTP ${response.status} ${response.statusText}`
+    )
+
+    return null
+  }
+
+  async getOwnerOfToken(
+    tokenId: string
+  ): Promise<{ tokenId: string, owner: string } | null> {
+    const owner = await this.unsRegistryContract.ownerOf(BigInt(tokenId))
+    if (!owner) {
+      return null
+    }
+    return { tokenId, owner }
   }
 }

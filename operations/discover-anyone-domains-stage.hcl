@@ -1,4 +1,4 @@
-job "discover-new-key-events-stage" {
+job "discover-anyone-domains-stage" {
   datacenters = ["ator-fin"]
   type = "batch"
   namespace = "stage-services"
@@ -15,17 +15,17 @@ job "discover-new-key-events-stage" {
     prohibit_overlap = true
   }
 
-  group "discover-new-key-events-stage-group" {
+  group "discover-anyone-domains-stage-group" {
   	count = 1
 
-    task "discover-new-key-events-stage-task" {
+    task "discover-anyone-domains-stage-task" {
       driver = "docker"
 
       config {
         image = "ghcr.io/anyone-protocol/api-service:${VERSION}"
         entrypoint = [ "npx" ]
         command = "tsx"
-        args = [ "scripts/discover-new-key-events.ts" ]
+        args = [ "scripts/discover-anyone-domains.ts" ]
       }
 
       vault {
@@ -46,7 +46,7 @@ job "discover-new-key-events-stage" {
 
       template {
         data = <<-EOH
-        {{ with secret "kv/stage-services/discover-new-key-events-stage" }}
+        {{ with secret "kv/stage-services/discover-anyone-domains-stage" }}
         JSON_RPC_URL="https://base-mainnet.infura.io/v3/{{ .Data.data.INFURA_API_KEY_0 }}"
         {{ end }}
         EOH
