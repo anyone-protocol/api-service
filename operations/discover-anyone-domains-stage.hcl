@@ -56,12 +56,13 @@ job "discover-anyone-domains-stage" {
         env         = true
       }
 
+      consul {}
+
       template {
         data = <<-EOH
-        MONGO_URI="mongodb://10.1.5.1:37002/api-service-stage"
-        # {{- range service "validator-stage-mongo" }}
-        # MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-stage"
-        # {{- end }}
+        {{- range service "validator-stage-mongo" }}
+        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-stage"
+        {{- end }}
         EOH
         destination = "local/config.env"
         env         = true

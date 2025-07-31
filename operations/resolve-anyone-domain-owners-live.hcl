@@ -56,6 +56,8 @@ job "resolve-anyone-domain-owners-live" {
         env         = true
       }
 
+      consul {}
+
       template {
         data = <<-EOH
         {{- range service "validator-live-mongo" }}

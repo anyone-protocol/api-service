@@ -56,12 +56,13 @@ job "discover-new-key-events-live" {
         env         = true
       }
 
+      consul {}
+
       template {
         data = <<-EOH
-        MONGO_URI="mongodb://10.1.5.1:37002/api-service-live"
-        # {{- range service "validator-live-mongo" }}
-        # MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-live"
-        # {{- end }}
+        {{- range service "validator-live-mongo" }}
+        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-live"
+        {{- end }}
         EOH
         destination = "local/config.env"
         env         = true

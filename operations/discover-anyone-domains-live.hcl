@@ -56,6 +56,8 @@ job "discover-anyone-domains-live" {
         env         = true
       }
 
+      consul {}
+
       template {
         data = <<-EOH
         {{- range service "validator-live-mongo" }}
