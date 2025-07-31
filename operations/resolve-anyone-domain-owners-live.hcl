@@ -49,7 +49,7 @@ job "resolve-anyone-domain-owners-live" {
       template {
         data = <<-EOH
         {{ with secret "kv/live-services/resolve-anyone-domain-owners-live" }}
-        JSON_RPC_URL="https://base-mainnet.infura.io/v3/{{ .Data.data.INFURA_API_KEY_0 }}"
+        JSON_RPC_URL="https://base-mainnet.infura.io/v3/{{ .Data.data.INFURA_API_KEY_1 }}"
         {{ end }}
         EOH
         destination = "secrets/keys.env"

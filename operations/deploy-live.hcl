@@ -117,6 +117,26 @@ job "api-service-live" {
         env = true
       }
 
+      vault {
+        role = "any1-nomad-workloads-controller"
+      }
+
+      identity {
+        name = "vault_default"
+        aud  = ["any1-infra"]
+        ttl  = "1h"
+      }
+
+      template {
+        data = <<-EOH
+        {{ with secret "kv/live-services/api-service-live" }}
+        JSON_RPC_URL="https://base-mainnet.infura.io/v3/{{ .Data.data.INFURA_API_KEY_1 }}"
+        {{ end }}
+        EOH
+        destination = "secrets/keys.env"
+        env         = true
+      }
+
       service {
         name = "api-service-live"
         tags = [ "logging" ]

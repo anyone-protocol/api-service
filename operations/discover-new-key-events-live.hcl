@@ -49,7 +49,7 @@ job "discover-new-key-events-live" {
       template {
         data = <<-EOH
         {{ with secret "kv/live-services/discover-new-key-events-live" }}
-        JSON_RPC_URL="https://base-mainnet.infura.io/v3/{{ .Data.data.INFURA_API_KEY_0 }}"
+        JSON_RPC_URL="https://base-mainnet.infura.io/v3/{{ .Data.data.INFURA_API_KEY_1 }}"
         {{ end }}
         EOH
         destination = "secrets/keys.env"
