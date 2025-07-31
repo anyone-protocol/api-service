@@ -228,3 +228,53 @@ Example response:
 ```
 
 This endpoint is used for geolocation and network analysis of all known relays.
+
+# Operators
+Fetch a list of relay operator addresses
+- **GET** `/operators` => `string[]`
+
+Example response:
+```json
+[
+    "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+    "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+    "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+    ... more results
+]
+```
+
+# Operators with Anyone Domains
+Fetch a list of relay operators and any domains they own
+- **GET** `/operators?withDomains=true`
+
+Response:
+```json
+[
+    {
+        "address": string,
+        "domains": {
+            tokenId: string,
+            name: string,
+            owner: string | undefined,
+            tld: string
+        }[]
+    }
+]
+```
+
+# Anyone Domains
+Fetch a list of .anyone domains
+- **GET** `/anyone-domains`
+Response:
+
+```json
+[
+    {
+        "tokenId": string,
+        "name": string,
+        "owner": string | undefined,
+        "tld": string
+    },
+    ... more results
+]
+```

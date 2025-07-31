@@ -299,7 +299,20 @@ class HexInfo {
 
 app.get('/operators', async (req, res) => {
     try {
+        const withDomains = req
+            .query
+            .withDomains as string | undefined === 'true';
         const operators = await operatorRegistryService.getOperators();
+        if (withDomains) {
+            const anyoneDomains = await unstoppableDomainsService
+                .getAnyoneDomains();
+            const operatorsWithDomains = operators.map(operator => ({
+                address: operator,
+                domains: anyoneDomains
+                    .filter(domain => domain.owner === operator)
+            }));
+            return res.json(operatorsWithDomains);
+        }
         return res.json(operators);
     } catch (error) {
         console.error(error);
@@ -309,7 +322,8 @@ app.get('/operators', async (req, res) => {
 
 app.get('/anyone-domains', async (req, res) => {
     try {
-        const anyoneDomains = await unstoppableDomainsService.getAnyoneDomains();
+        const anyoneDomains = await unstoppableDomainsService
+            .getAnyoneDomains();
         return res.json(anyoneDomains);
     } catch (error) {
         console.error(error);
