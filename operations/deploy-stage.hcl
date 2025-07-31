@@ -82,11 +82,20 @@ job "api-service-stage" {
 
       env {
         VERSION="DEPLOY_TAG"
+        ONIONOO_PROTOCOL="http://"
+        CLUSTER="local"
+        ENV="main"
+        JOB="consulagentonionoo"
+        HEXAGON_RESOLUTION="4"
+        GEODATADIR="/api-service-stage/geo-ip-db/data"
+        GEOTMPDIR="/api-service-stage/tmp"
         UNS_START_BLOCK=32615764
         UNS_REGISTRY_ADDRESS="0xF6c1b83977DE3dEffC476f5048A0a84d3375d498"
         UNS_METADATA_URL="https://api.unstoppabledomains.com/metadata"
         UNS_TLD="anyone"
       }
+
+      consul {}
 
       template {
         data = <<-EOH
@@ -99,13 +108,7 @@ job "api-service-stage" {
         {{- range service "onionoo-war-live" }}
         ONIONOO_INSTANCE="{{ .Address }}:{{ .Port }}"
         {{- end }}
-        ONIONOO_PROTOCOL="http://"
-        CLUSTER="local"
-        ENV="main"
-        JOB="consulagentonionoo"
-        HEXAGON_RESOLUTION="4"
-        GEODATADIR="/api-service-stage/geo-ip-db/data"
-        GEOTMPDIR="/api-service-stage/tmp"
+
         {{- range service "validator-stage-mongo" }}
         MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-stage"
         {{- end }}
