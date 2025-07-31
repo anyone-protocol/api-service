@@ -90,7 +90,7 @@ job "api-service-stage" {
 
       template {
         data = <<-EOH
-        OPERATOR_REGISTRY_PROCESS_ID="Ori7-Ejn8fxQCanbhNHvWSvkeR6xOFUnyxCFYPmOUzg"
+        OPERATOR_REGISTRY_PROCESS_ID="{{ key "smart-contracts/stage/operator-registry-address" }}"
 
 	      {{- range service "victoriametrics-db" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
@@ -106,10 +106,9 @@ job "api-service-stage" {
         HEXAGON_RESOLUTION="4"
         GEODATADIR="/api-service-stage/geo-ip-db/data"
         GEOTMPDIR="/api-service-stage/tmp"
-        MONGO_URI="mongodb://10.1.5.1:37002/api-service-stage"
-        # {{- range service "validator-stage-mongo" }}
-        # MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-stage"
-        # {{- end }}
+        {{- range service "validator-stage-mongo" }}
+        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-stage"
+        {{- end }}
         EOH
         destination = "local/config.env"
         env = true
