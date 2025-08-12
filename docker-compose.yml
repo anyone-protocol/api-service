@@ -1,7 +1,6 @@
 services:
   api-service:
     image: ghcr.io/anyone-protocol/api-service:latest
-    restart: always
     env_file:
       - .env
     environment:
@@ -13,7 +12,6 @@ services:
       - ./data/:/usr/src/app/data
   mongodb:
     image: mongo:8.0.12
-    restart: always
     ports:
       - "${MONGODB_PORT:-27017}:27017"
     volumes:
