@@ -309,7 +309,10 @@ app.get('/operators', async (req, res) => {
             const operatorsWithDomains = operators.map(operator => ({
                 address: operator,
                 domains: anyoneDomains
-                    .filter(domain => domain.owner === operator)
+                    .filter(
+                        domain => domain.owner?.toLowerCase() ===
+                            operator.toLowerCase()
+                    )
             }));
             return res.json(operatorsWithDomains);
         }
