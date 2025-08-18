@@ -59,14 +59,23 @@ async function discoverAnyoneDomains() {
       continue
     }
 
-    const newDomain = new UNSDomain({
-      tokenId: event.tokenId,
-      name: metadata.name
-    })
-    await newDomain.save()
-    logger.info(
-      `Saved domain [${metadata.name}] with token ID [${event.tokenId}]`
-    )
+    const existingDomain = await UNSDomain.findOne({ tokenId: event.tokenId })
+
+    if (!existingDomain) {
+      const newDomain = new UNSDomain({
+        tokenId: event.tokenId,
+        name: metadata.name
+      })
+      await newDomain.save()
+      logger.info(
+        `Saved domain [${metadata.name}] with token ID [${event.tokenId}]`
+      )
+    } else {
+      logger.info(
+        `Skipping existing domain [${existingDomain.name}] ` +
+          `with token ID [${event.tokenId}]`
+      )
+    }
 
     event.isProcessed = true
     await event.save()

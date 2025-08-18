@@ -37,6 +37,10 @@ async function discoverNewKeyEvents() {
     return
   }
 
+  const existingNewKeyEvents = (await NewKeyEvent.find()).map(
+    event => event.tokenId
+  )
+
   logger.info(`Found ${newKeyEvents.length} new key events.`)
   const newKeyEventDocuments = newKeyEvents.map(event => {
     return new NewKeyEvent({
@@ -48,7 +52,10 @@ async function discoverNewKeyEvents() {
       keyIndex: event.args.keyIndex?.toString(),
       key: event.args.key
     })
-  })
+  }).filter(event => !existingNewKeyEvents.includes(event.tokenId))
+  logger.info(
+    `Found ${newKeyEventDocuments.length} after filtering on duplicate tokenIds`
+  )
 
   await NewKeyEvent.insertMany(newKeyEventDocuments)
   logger.info(`Saved ${newKeyEventDocuments.length} new key events to MongoDB.`)
