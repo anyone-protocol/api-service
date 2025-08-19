@@ -221,7 +221,7 @@ const hardware_relay_validation_rules = [
     body('wallet').notEmpty().withMessage("wallet should not be empty"),
     body('fingerprint')
         .notEmpty().withMessage("fingerprint should not be empty")
-        .matches(/^[a-fA-F0-9]{40,64}$/).withMessage("fingerprint must be a 40-64 character hexadecimal string"),
+        .matches(/^[a-fA-F0-9]{40}$/).withMessage("fingerprint must be a 40 character hexadecimal string"),
     body('nftid').notEmpty().withMessage("nftid should not be empty"),
     body('build').notEmpty().withMessage("build should not be empty"),
     body('flags').notEmpty().withMessage("flags should not be empty"),
