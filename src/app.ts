@@ -244,8 +244,12 @@ app.post('/hardware', hardware_relay_validation_rules, async (req: any, res: any
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-  
-    const updateHardwareInfo = await onionooService.updateHardwareInfo(hardwareInfo);
+    try {
+        const updateHardwareInfo = await onionooService.updateHardwareInfo(hardwareInfo);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send('Error posting hardware info');
+    }
 
     res.status(200).send(updateHardwareInfo);
 });
