@@ -25,14 +25,43 @@ async function resolveAnyoneDomainOwners() {
   }
 
   logger.info(`Resolving owners for [${anyoneDomains.length}] domains...`)
-  const tokenOwnersByTokenId = (await Promise.all(
-    anyoneDomains.map(
-      async domain => unsService.getOwnerOfToken(domain.tokenId)
-    )
-  )).reduce(
-    (obj, item) => item ? (obj[item.tokenId] = item.owner, obj) : obj,
-    {} as Record<string, string>
-  )
+
+  // Batch the requests to avoid rate limiting
+  const batchSize = 10 // Conservative batch size for Infura API
+  const delayBetweenBatches = 1000 // 1 second delay between batches
+  const tokenOwnersByTokenId: Record<string, string> = {}
+
+  for (let i = 0; i < anyoneDomains.length; i += batchSize) {
+    const batch = anyoneDomains.slice(i, i + batchSize)
+    const batchNumber = Math.floor(i / batchSize) + 1
+    const totalBatches = Math.ceil(anyoneDomains.length / batchSize)
+
+    logger.info(`Processing batch ${batchNumber}/${totalBatches} (${batch.length} domains)...`)
+
+    try {
+      const batchResults = await Promise.all(
+        batch.map(async domain => unsService.getOwnerOfToken(domain.tokenId))
+      )
+
+      // Add successful results to the map
+      batchResults.forEach(result => {
+        if (result) {
+          tokenOwnersByTokenId[result.tokenId] = result.owner
+        }
+      })
+
+      logger.info(`Batch ${batchNumber}/${totalBatches} completed successfully`)
+
+      // Add delay between batches (except for the last batch)
+      if (i + batchSize < anyoneDomains.length) {
+        logger.info(`Waiting ${delayBetweenBatches}ms before next batch...`)
+        await new Promise(resolve => setTimeout(resolve, delayBetweenBatches))
+      }
+    } catch (error) {
+      logger.error(`Error processing batch ${batchNumber}/${totalBatches}:`, error)
+      // Continue with next batch instead of failing completely
+    }
+  }
 
   for (const anyoneDomain of anyoneDomains) {
     const owner = tokenOwnersByTokenId[anyoneDomain.tokenId]
