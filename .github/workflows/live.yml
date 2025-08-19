@@ -1,5 +1,3 @@
-permissions:
-  contents: read
 name: LIVE - Tag and Deploy
 
 on:
@@ -8,6 +6,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
 
     steps:
       - name: Check out the repo
