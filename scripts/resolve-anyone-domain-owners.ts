@@ -15,21 +15,18 @@ async function resolveAnyoneDomainOwners() {
   const unsService = new UnstoppableDomainsService()
 
   logger.info('Resolving anyone domain owners from UNSDomain collection...')
-  const anyoneDomains = await UNSDomain.find({
-    owner: { $exists: false },
-    tld
-  })
+  const anyoneDomains = await UNSDomain.find({ tld })
   logger.info(
-    `Found [${anyoneDomains.length}] [${tld}] domains without owners.`
+    `Found [${anyoneDomains.length}] [${tld}] domains.`
   )
   if (anyoneDomains.length === 0) {
-    logger.info(`No [${tld}] domains found without owners.`)
+    logger.info(`No [${tld}] domains found.`)
     return
   }
 
   logger.info(`Resolving owners for [${anyoneDomains.length}] domains...`)
   const tokenOwnersByTokenId = (await Promise.all(
-      anyoneDomains.map(
+    anyoneDomains.map(
       async domain => unsService.getOwnerOfToken(domain.tokenId)
     )
   )).reduce(
