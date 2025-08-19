@@ -28,7 +28,7 @@ async function resolveAnyoneDomainOwners() {
 
   // Batch the requests to avoid rate limiting
   const batchSize = 5 // Conservative batch size for Infura API
-  const delayBetweenBatches = 3000 // 3 seconds delay between batches
+  const delayBetweenBatches = 5000 // 3 seconds delay between batches
   const tokenOwnersByTokenId: Record<string, string> = {}
 
   for (let i = 0; i < anyoneDomains.length; i += batchSize) {
