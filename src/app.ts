@@ -219,7 +219,9 @@ const hardware_relay_validation_rules = [
     body('company').notEmpty().withMessage("company should not be empty"),
     body('format').notEmpty().withMessage("format should not be empty"),
     body('wallet').notEmpty().withMessage("wallet should not be empty"),
-    body('fingerprint').notEmpty().withMessage("fingerprint should not be empty"),
+    body('fingerprint')
+        .notEmpty().withMessage("fingerprint should not be empty")
+        .matches(/^[a-fA-F0-9]{40}$/).withMessage("fingerprint must be a 40 character hexadecimal string"),
     body('nftid').notEmpty().withMessage("nftid should not be empty"),
     body('build').notEmpty().withMessage("build should not be empty"),
     body('flags').notEmpty().withMessage("flags should not be empty"),
@@ -242,10 +244,13 @@ app.post('/hardware', hardware_relay_validation_rules, async (req: any, res: any
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-  
-    const updateHardwareInfo = await onionooService.updateHardwareInfo(hardwareInfo);
-
-    res.status(200).send(updateHardwareInfo);
+    try {
+        const updateHardwareInfo = await onionooService.updateHardwareInfo(hardwareInfo);
+        return res.status(200).send(updateHardwareInfo);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send('Error posting hardware info');
+    }
 });
 
 function buildQuery(metric: string): string {
