@@ -246,12 +246,11 @@ app.post('/hardware', hardware_relay_validation_rules, async (req: any, res: any
     }
     try {
         const updateHardwareInfo = await onionooService.updateHardwareInfo(hardwareInfo);
+        return res.status(200).send(updateHardwareInfo);
     } catch (error) {
         console.error(error);
         return res.status(500).send('Error posting hardware info');
     }
-
-    res.status(200).send(updateHardwareInfo);
 });
 
 function buildQuery(metric: string): string {
