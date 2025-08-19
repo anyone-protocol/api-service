@@ -79,14 +79,26 @@ export class OperatorRegistryService {
       logger.info(
         'Fetching operator registry state because the cache is empty or expired'
       )
-      this.operatorRegistryCachedState = await OperatorRegistryService
-        .getOperatorRegistryState(this.operatorRegistryProcessId)
-      this.operatorRegistryCacheTimestamp = now
-      logger.info(`Operator registry state fetched successfully!`)
+      try {
+        this.operatorRegistryCachedState = await OperatorRegistryService
+          .getOperatorRegistryState(this.operatorRegistryProcessId)
+        this.operatorRegistryCacheTimestamp = now
+        logger.info(`Operator registry state fetched successfully!`)
+      } catch (error: Error | any) {
+        logger.error(
+          `Failed to get Operator Registry State: ${error.message}`,
+          error
+        )
+      }
     } else {
       logger.info(
         `Using cached operator registry state (age: ${cacheAge.toFixed(2)}s)`
       )
+    }
+
+    if (!this.operatorRegistryCachedState) {
+      logger.error('Operator registry state is not available!')
+      return []
     }
 
     const verifiedOperatorAddresses = _.uniq(
