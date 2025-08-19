@@ -13,9 +13,9 @@ export class OnionooService {
     }
 
     async updateHardwareInfo(hardwareInfo: HardwareInfo): Promise<any> {
-        const fingerprint = encodeURIComponent(hardwareInfo.fingerprint);
+        const fingerprint = hardwareInfo.fingerprint
         if (fingerprint.length != 40) { throw new Error('Fingerprint must be 40 char hex string') }
-        const response = await axios.put(`${this.baseUrl}/hardware/${fingerprint}`, hardwareInfo).then();
+        const response = await axios.put(`${this.baseUrl}/hardware/${encodeURIComponent(fingerprint)}`, hardwareInfo).then();
         return response.data;
     }
 }
