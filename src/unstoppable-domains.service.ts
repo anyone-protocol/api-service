@@ -1,4 +1,6 @@
 import { Contract, ethers, JsonRpcProvider } from 'ethers'
+import { MulticallProvider } from '@ethers-ext/provider-multicall'
+
 import { unsRegistryAbi } from './schema/uns-registry.abi'
 import { logger } from './util/logger'
 import axios from 'axios'
@@ -11,6 +13,7 @@ export class UnstoppableDomainsService {
   private readonly unsMetadataUrl: string
   public readonly unsTld: string
 
+  private mprovider: MulticallProvider
   private provider: JsonRpcProvider
   private unsRegistryContract: Contract
 
@@ -42,10 +45,11 @@ export class UnstoppableDomainsService {
     logger.info(`Using UNS TLD [${this.unsTld}]`)
 
     this.provider = new JsonRpcProvider(this.jsonRpcUrl)
+    this.mprovider = new MulticallProvider(this.provider)
     this.unsRegistryContract = new Contract(
       this.unsRegistryAddress,
       unsRegistryAbi,
-      this.provider
+      this.mprovider
     )
 
     logger.info('UnstoppableDomainsService initialized.')
