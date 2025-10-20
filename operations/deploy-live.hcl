@@ -93,6 +93,7 @@ job "api-service-live" {
         UNS_REGISTRY_ADDRESS="0xF6c1b83977DE3dEffC476f5048A0a84d3375d498"
         UNS_METADATA_URL="https://api.unstoppabledomains.com/metadata"
         UNS_TLD="anyone"
+        CU_URL="https://cu.anyone.tech"
       }
 
       consul {}
