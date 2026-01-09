@@ -44,7 +44,8 @@ job "api-service-stage" {
         "traefik-ec.http.routers.api-stage.tls=true",
         "traefik-ec.http.routers.api-stage.tls.certresolver=anyoneresolver",
         "traefik-ec.http.routers.api-stage.middlewares=api-stage-ratelimit",
-        "traefik-ec.http.middlewares.api-stage-ratelimit.ratelimit.average=1000"
+        "traefik-ec.http.middlewares.api-stage-ratelimit.ratelimit.average=1000",
+        "traefik-ec.http.middlewares.api-stage-ratelimit.ratelimit.burst=10"
       ]
       check {
         name = "Api service check"
