@@ -147,7 +147,6 @@ job "api-service-stage" {
         cpu = 256
         memory = 1024
       }
-
     }
 
     task "varnish-cache-stage-task" {
