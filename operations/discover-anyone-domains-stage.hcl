@@ -11,7 +11,7 @@ job "discover-anyone-domains-stage" {
   }
 
   periodic {
-    crons            = [ "@hourly" ]
+    crons            = [ "0 */4 * * *" ] # every 4 hours
     prohibit_overlap = true
   }
 
