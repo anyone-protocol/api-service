@@ -146,7 +146,7 @@ job "api-service-live" {
 
       resources {
         cpu = 256
-        memory = 8192
+        memory = 4096
       }
 
     }
