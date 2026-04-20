@@ -2,6 +2,7 @@ import 'dotenv/config'
 import mongoose from 'mongoose'
 import { logger } from '../src/util/logger'
 import { UNSDomain } from '../src/schema/uns-domain.schema'
+import { TransferEvent } from '../src/schema/transfer-event.schema'
 import { UnstoppableDomainsService } from '../src/unstoppable-domains.service'
 
 async function resolveAnyoneDomainOwners() {
@@ -14,68 +15,121 @@ async function resolveAnyoneDomainOwners() {
   await mongoose.connect(mongodbUri)
   const unsService = new UnstoppableDomainsService()
 
-  logger.info('Resolving anyone domain owners from UNSDomain collection...')
-  const anyoneDomains = await UNSDomain.find({ tld })
+  // Step 1: Apply unprocessed Transfer events (zero RPC calls)
+  await applyTransferEvents(tld)
+
+  // Step 2: Resolve owners for domains that still have no owner (new domains)
+  await resolveNewDomainOwners(unsService, tld)
+}
+
+async function applyTransferEvents(tld: string) {
+  const unprocessedTransfers = await TransferEvent.find({ isProcessed: false })
   logger.info(
-    `Found [${anyoneDomains.length}] [${tld}] domains.`
+    `Found [${unprocessedTransfers.length}] unprocessed Transfer events.`
   )
-  if (anyoneDomains.length === 0) {
-    logger.info(`No [${tld}] domains found.`)
+
+  if (unprocessedTransfers.length === 0) {
     return
   }
 
-  logger.info(`Resolving owners for [${anyoneDomains.length}] domains...`)
+  let applied = 0
+  for (const transfer of unprocessedTransfers) {
+    const domain = await UNSDomain.findOne({
+      tokenId: transfer.tokenId,
+      tld
+    })
 
-  // Batch the requests to avoid rate limiting
-  const batchSize = 5 // Conservative batch size for Infura API
-  const delayBetweenBatches = 5000 // 5 seconds delay between batches
-  const tokenOwnersByTokenId: Record<string, string> = {}
+    if (domain) {
+      domain.owner = transfer.to
+      domain.ownerUpdatedAtBlock = transfer.blockNumber
+      await domain.save()
+      applied++
+      logger.info(
+        `Applied Transfer event: domain [${domain.name}] ` +
+          `ownership → [${transfer.to}] at block [${transfer.blockNumber}]`
+      )
+    }
 
-  for (let i = 0; i < anyoneDomains.length; i += batchSize) {
-    const batch = anyoneDomains.slice(i, i + batchSize)
+    transfer.isProcessed = true
+    await transfer.save()
+  }
+
+  logger.info(
+    `Applied [${applied}] Transfer events to .anyone domains ` +
+      `(${unprocessedTransfers.length} total processed).`
+  )
+}
+
+async function resolveNewDomainOwners(
+  unsService: UnstoppableDomainsService,
+  tld: string
+) {
+  const domainsWithoutOwner = await UNSDomain.find({
+    tld,
+    $or: [
+      { owner: { $exists: false } },
+      { owner: null },
+      { owner: '' }
+    ]
+  })
+
+  logger.info(
+    `Found [${domainsWithoutOwner.length}] [${tld}] domains without an owner.`
+  )
+
+  if (domainsWithoutOwner.length === 0) {
+    logger.info('All domains already have owners. Nothing to resolve.')
+    return
+  }
+
+  const batchSize = 5
+  const delayBetweenBatches = 5000
+
+  for (let i = 0; i < domainsWithoutOwner.length; i += batchSize) {
+    const batch = domainsWithoutOwner.slice(i, i + batchSize)
     const batchNumber = Math.floor(i / batchSize) + 1
-    const totalBatches = Math.ceil(anyoneDomains.length / batchSize)
+    const totalBatches = Math.ceil(domainsWithoutOwner.length / batchSize)
 
-    logger.info(`Processing batch ${batchNumber}/${totalBatches} (${batch.length} domains)...`)
+    logger.info(
+      `Processing batch ${batchNumber}/${totalBatches} ` +
+        `(${batch.length} domains)...`
+    )
 
     try {
       const batchResults = await Promise.all(
-        batch.map(async domain => unsService.getOwnerOfToken(domain.tokenId))
+        batch.map(async domain =>
+          unsService.getOwnerOfToken(domain.tokenId)
+        )
       )
 
-      // Add successful results to the map
-      batchResults.forEach(result => {
+      for (const result of batchResults) {
         if (result) {
-          tokenOwnersByTokenId[result.tokenId] = result.owner
+          const domain = domainsWithoutOwner.find(
+            d => d.tokenId === result.tokenId
+          )
+          if (domain) {
+            domain.owner = result.owner
+            await domain.save()
+            logger.info(
+              `Resolved owner for domain [${domain.name}] ` +
+                `with token ID [${domain.tokenId}]: [${result.owner}]`
+            )
+          }
         }
-      })
+      }
 
-      logger.info(`Batch ${batchNumber}/${totalBatches} completed successfully`)
+      logger.info(
+        `Batch ${batchNumber}/${totalBatches} completed successfully`
+      )
 
-      // Add delay between batches (except for the last batch)
-      if (i + batchSize < anyoneDomains.length) {
+      if (i + batchSize < domainsWithoutOwner.length) {
         logger.info(`Waiting ${delayBetweenBatches}ms before next batch...`)
         await new Promise(resolve => setTimeout(resolve, delayBetweenBatches))
       }
     } catch (error) {
-      logger.error(`Error processing batch ${batchNumber}/${totalBatches}:`, error)
-      // Continue with next batch instead of failing completely
-    }
-  }
-
-  for (const anyoneDomain of anyoneDomains) {
-    const owner = tokenOwnersByTokenId[anyoneDomain.tokenId]
-    if (owner) {
-      anyoneDomain.owner = owner
-      await anyoneDomain.save()
-      logger.info(
-        `Updated owner for domain [${anyoneDomain.name}] ` +
-        `with token ID [${anyoneDomain.tokenId}]: [${anyoneDomain.owner}]`
-      )
-    } else {
-      logger.warn(
-        `No owner found for domain [${anyoneDomain.name}] ` +
-        `with token ID [${anyoneDomain.tokenId}].`
+      logger.error(
+        `Error processing batch ${batchNumber}/${totalBatches}:`,
+        error
       )
     }
   }

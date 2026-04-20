@@ -102,6 +102,32 @@ export class UnstoppableDomainsService {
     return null
   }
 
+  async queryTransferEvents(
+    from: ethers.BlockTag,
+    to?: ethers.BlockTag,
+    knownTokenIds?: Set<string>
+  ): Promise<ethers.EventLog[]> {
+    const filter = this.unsRegistryContract.filters.Transfer()
+    logger.info(`Querying Transfer events from block [${from}] to [${to}]`)
+    const allTransfers = (
+      await this.unsRegistryContract.queryFilter(filter, from, to)
+    ).filter(event => event instanceof ethers.EventLog) as ethers.EventLog[]
+
+    if (knownTokenIds && knownTokenIds.size > 0) {
+      const filtered = allTransfers.filter(
+        event => knownTokenIds.has(event.args.tokenId.toString())
+      )
+      logger.info(
+        `Found [${allTransfers.length}] Transfer events, ` +
+          `[${filtered.length}] match known .anyone tokenIds.`
+      )
+      return filtered
+    }
+
+    logger.info(`Found [${allTransfers.length}] Transfer events.`)
+    return allTransfers
+  }
+
   async getOwnerOfToken(
     tokenId: string
   ): Promise<{ tokenId: string, owner: string } | null> {

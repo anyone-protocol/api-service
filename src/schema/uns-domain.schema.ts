@@ -17,6 +17,10 @@ const UNSDomainSchema = new mongoose.Schema({
   owner: {
     type: String,
     required: false
+  },
+  ownerUpdatedAtBlock: {
+    type: Number,
+    required: false
   }
 })
 

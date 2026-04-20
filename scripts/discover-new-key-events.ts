@@ -1,6 +1,8 @@
 import 'dotenv/config'
 import mongoose from 'mongoose'
 import { NewKeyEvent } from '../src/schema/new-key-event.schema'
+import { TransferEvent } from '../src/schema/transfer-event.schema'
+import { UNSDomain } from '../src/schema/uns-domain.schema'
 import { UnstoppableDomainsService } from '../src/unstoppable-domains.service'
 import { logger } from '../src/util/logger'
 import {
@@ -60,10 +62,73 @@ async function discoverNewKeyEvents() {
   await NewKeyEvent.insertMany(newKeyEventDocuments)
   logger.info(`Saved ${newKeyEventDocuments.length} new key events to MongoDB.`)
 
+  // Query Transfer events for known .anyone domains in same block range
+  await discoverTransferEvents(unsService, fromBlock, currentBlock)
+
   await setLastSafeCompleteBlockNumber(currentBlock)
   logger.info(
     `Updated last safe complete block number to [${currentBlock}].`
   )
+}
+
+async function discoverTransferEvents(
+  unsService: UnstoppableDomainsService,
+  fromBlock: number,
+  toBlock: number
+) {
+  const knownDomains = await UNSDomain.find(
+    { tld: 'anyone' },
+    { tokenId: 1 }
+  )
+  const knownTokenIds = new Set(knownDomains.map(d => d.tokenId))
+  logger.info(
+    `Querying Transfer events for [${knownTokenIds.size}] known .anyone domains`
+  )
+
+  if (knownTokenIds.size === 0) {
+    logger.info('No known .anyone domains yet, skipping Transfer event query.')
+    return
+  }
+
+  const transferEvents = await unsService.queryTransferEvents(
+    fromBlock,
+    toBlock,
+    knownTokenIds
+  )
+
+  if (transferEvents.length === 0) {
+    logger.info('No Transfer events found for known .anyone domains.')
+    return
+  }
+
+  const existingTransferHashes = new Set(
+    (await TransferEvent.find(
+      {},
+      { transactionHash: 1, tokenId: 1 }
+    )).map(e => `${e.transactionHash}-${e.tokenId}`)
+  )
+
+  const transferDocs = transferEvents
+    .map(event => new TransferEvent({
+      blockNumber: event.blockNumber,
+      blockHash: event.blockHash,
+      transactionHash: event.transactionHash,
+      tokenId: event.args.tokenId.toString(),
+      from: event.args.from,
+      to: event.args.to
+    }))
+    .filter(doc => !existingTransferHashes.has(
+      `${doc.transactionHash}-${doc.tokenId}`
+    ))
+
+  if (transferDocs.length > 0) {
+    await TransferEvent.insertMany(transferDocs)
+    logger.info(
+      `Saved [${transferDocs.length}] Transfer events to MongoDB.`
+    )
+  } else {
+    logger.info('All Transfer events already recorded, nothing new to save.')
+  }
 }
 
 async function getLastSafeCompleteBlockNumber(): Promise<number> {
