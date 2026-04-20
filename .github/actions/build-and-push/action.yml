@@ -1,5 +1,5 @@
 name: Build and Push Docker Image
-
+description: 'Builds a Docker image of the API service and pushes it to GitHub Container Registry (GHCR).'
 inputs:
   docker-username:
     required: true
