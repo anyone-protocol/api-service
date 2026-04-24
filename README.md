@@ -278,3 +278,27 @@ Response:
     ... more results
 ]
 ```
+
+## UNS indexer Postgres data source
+
+`/operators?withDomains=true` and `/anyone-domains` are backed by the
+Postgres database owned and written by the
+[`uns-record-indexer`](https://github.com/anyone-protocol/uns-record-indexer)
+microservice. The api-service connects with a read-only role and only reads
+the `uns_tokens` table.
+
+Configuration:
+
+- `DB_HOST` (required) — Postgres host of the UNS indexer database.
+- `DB_PORT` (optional, default `5432`) — Postgres port.
+- `DB_USER` (required) — read-only role name. Should have only `SELECT`
+  on `uns_tokens`.
+- `DB_PASS` (required) — password for the read-only role.
+- `DB_NAME` (required) — database name.
+- `UNS_DOMAINS_CACHE_TTL_SECONDS` (optional, default `30`) — in-process TTL
+  cache in front of the query to protect the shared database. Set to `0`
+  to disable caching.
+
+The entity class [`src/schema/uns-token.entity.ts`](src/schema/uns-token.entity.ts)
+mirrors the indexer's `UnsTokenEntity`; migrations remain authoritative in the
+indexer repository. `synchronize` is disabled.

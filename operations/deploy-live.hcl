@@ -133,6 +133,11 @@ job "api-service-live" {
         data = <<-EOH
         {{ with secret "kv/live-services/api-service-live" }}
         JSON_RPC_URL="https://base-mainnet.infura.io/v3/{{ .Data.data.INFURA_API_KEY_1 }}"
+        DB_HOST="{{ .Data.data.DB_HOST }}"
+        DB_PORT="{{ .Data.data.DB_PORT }}"
+        DB_USER="{{ .Data.data.DB_USER }}"
+        DB_PASS="{{ .Data.data.DB_PASS }}"
+        DB_NAME="{{ .Data.data.DB_NAME }}"
         {{ end }}
         EOH
         destination = "secrets/keys.env"
