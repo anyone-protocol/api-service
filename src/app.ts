@@ -10,7 +10,6 @@ import QueryString from 'qs';
 import { H3Service } from './H3Service';
 import { GeoLiteService } from './GeoLiteService';
 import { OperatorRegistryService } from './operator-registry.service';
-import { UnstoppableDomainsService } from './unstoppable-domains.service';
 import { UnsTokenQueryService } from './uns-token.repository';
 import { initUnsIndexerDataSource } from './data-source';
 import mongoose from 'mongoose';
@@ -44,7 +43,6 @@ const h3Service = new H3Service(resolution);
 const geoLiteService = new GeoLiteService();
 
 const operatorRegistryService = new OperatorRegistryService();
-const unstoppableDomainsService = new UnstoppableDomainsService();
 const unsTokenQueryService = new UnsTokenQueryService();
 
 app.get('/total-relays', async (req, res) => {
