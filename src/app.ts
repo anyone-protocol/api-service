@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -9,7 +10,8 @@ import QueryString from 'qs';
 import { H3Service } from './H3Service';
 import { GeoLiteService } from './GeoLiteService';
 import { OperatorRegistryService } from './operator-registry.service';
-import { UnstoppableDomainsService } from './unstoppable-domains.service';
+import { UnsTokenQueryService } from './uns-token.repository';
+import { initUnsIndexerDataSource } from './data-source';
 import mongoose from 'mongoose';
 dotenv.config();
 
@@ -41,7 +43,7 @@ const h3Service = new H3Service(resolution);
 const geoLiteService = new GeoLiteService();
 
 const operatorRegistryService = new OperatorRegistryService();
-const unstoppableDomainsService = new UnstoppableDomainsService();
+const unsTokenQueryService = new UnsTokenQueryService();
 
 app.get('/total-relays', async (req, res) => {
     await handleQueryRange(buildQuery(TOTAL_RELAYS_METRIC), req.query, res);
@@ -309,8 +311,8 @@ app.get('/operators', async (req, res) => {
             .withDomains as string | undefined === 'true';
         const operators = await operatorRegistryService.getOperators();
         if (withDomains) {
-            const anyoneDomains = await unstoppableDomainsService
-                .getAnyoneDomains();
+            const anyoneDomains = await unsTokenQueryService
+                .listAnyoneDomains();
             const operatorsWithDomains = operators.map(operator => ({
                 address: operator,
                 domains: anyoneDomains
@@ -330,8 +332,8 @@ app.get('/operators', async (req, res) => {
 
 app.get('/anyone-domains', async (req, res) => {
     try {
-        const anyoneDomains = await unstoppableDomainsService
-            .getAnyoneDomains();
+        const anyoneDomains = await unsTokenQueryService
+            .listAnyoneDomains();
         return res.json(anyoneDomains);
     } catch (error) {
         console.error(error);
@@ -345,6 +347,14 @@ const bootstrap = async () => {
             'mongodb://localhost:27017'
         console.log(`Connecting to MongoDB at [${mongodbUri}]`);
         await mongoose.connect(mongodbUri);
+        try {
+            await initUnsIndexerDataSource();
+        } catch (error) {
+            console.error(
+                'Failed to initialize UNS indexer data source:',
+                error
+            );
+        }
         app.listen(
             PORT,
             () => console.log(`Server running at http://localhost:${PORT}`)

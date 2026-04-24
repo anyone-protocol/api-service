@@ -4,7 +4,10 @@
     "module": "commonjs",
     "outDir": "./dist",
     "strict": true,
+    "strictPropertyInitialization": false,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "types": ["node"]
   },
   "include": ["src/**/*.ts", "shim.d.ts", "scripts/**/*.ts"],

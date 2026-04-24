@@ -1,0 +1,6 @@
+- Emphasis on code readability and quality, code should document itself
+- Use the edit tool, do not make new files to swap out with command line
+- Always update the README.md with feature updates or changes
+- Always make sure the build passes
+- Always make sure the tests pass (if there are any)
+- Always make sure lint is clean (if available)

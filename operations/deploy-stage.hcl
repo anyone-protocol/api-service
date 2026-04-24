@@ -90,14 +90,9 @@ job "api-service-stage" {
         HEXAGON_RESOLUTION="4"
         GEODATADIR="/api-service-stage/geo-ip-db/data"
         GEOTMPDIR="/api-service-stage/tmp"
-        UNS_START_BLOCK=32615764
-        UNS_REGISTRY_ADDRESS="0xF6c1b83977DE3dEffC476f5048A0a84d3375d498"
-        UNS_METADATA_URL="https://api.unstoppabledomains.com/metadata"
-        UNS_TLD="anyone"
         CU_URL="https://cu-stage.anyone.tech"
+        DB_NAME="uns_indexer"
       }
-
-      consul {}
 
       template {
         data = <<-EOH
@@ -114,25 +109,25 @@ job "api-service-stage" {
         {{- range service "validator-stage-mongo" }}
         MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-stage"
         {{- end }}
+
+        {{- range service "uns-record-indexer-postgres-stage" }}
+        DB_HOST="{{ .Address }}"
+        DB_PORT="{{ .Port }}"
+        {{- end }}
         EOH
         destination = "local/config.env"
         env = true
       }
 
-      vault {
-        role = "any1-nomad-workloads-controller"
-      }
+      consul {}
 
-      identity {
-        name = "vault_default"
-        aud  = ["any1-infra"]
-        ttl  = "1h"
-      }
+      vault { role = "any1-nomad-workloads-controller" }
 
       template {
         data = <<-EOH
         {{ with secret "kv/stage-services/api-service-stage" }}
-        JSON_RPC_URL="https://base-mainnet.infura.io/v3/{{ .Data.data.INFURA_API_KEY_0 }}"
+        DB_USER="{{ .Data.data.DB_USER }}"
+        DB_PASS="{{ .Data.data.DB_PASS }}"
         {{ end }}
         EOH
         destination = "secrets/keys.env"
@@ -177,7 +172,7 @@ job "api-service-stage" {
 
       template {
         change_mode = "noop"
-        data        = <<EOH
+        data        = <<-EOH
         vcl 4.0;
 
         backend default {
