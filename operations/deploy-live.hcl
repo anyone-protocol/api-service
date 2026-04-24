@@ -110,7 +110,7 @@ job "api-service-live" {
         MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-live"
         {{- end }}
 
-        {{- range service "uns-record-indexer-postgres-stage" }}
+        {{- range service "uns-record-indexer-postgres-live" }}
         DB_HOST="{{ .Address }}"
         DB_PORT="{{ .Port }}"
         {{- end }}
