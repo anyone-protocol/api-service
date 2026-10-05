@@ -146,7 +146,7 @@ job "api-service-stage" {
 
       resources {
         cpu = 256
-        memory = 1024
+        memory = 2048
       }
     }
 
@@ -172,7 +172,7 @@ job "api-service-stage" {
 
       resources {
         cpu = 256
-        memory = 256
+        memory = 1024
       }
 
       template {
