@@ -1,6 +1,7 @@
 variable "commit_sha" {
   type        = string
   description = "The git commit SHA to use for the runtime image tag"
+  default     = "11375d7ebdb5faa9677930d11a9aa18e3507cac7"
 }
 
 job "api-service-stage" {
@@ -103,25 +104,29 @@ job "api-service-stage" {
         data = <<-EOH
         OPERATOR_REGISTRY_PROCESS_ID="{{ key "smart-contracts/stage/operator-registry-address" }}"
 
-	      {{- range service "victoriametrics-db" }}
+	      {{- range service "victoriametrics-db|any" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	      {{- end }}
   
-        {{- range service "onionoo-war-live" }}
+        {{- range service "onionoo-war-live|any" }}
         ONIONOO_INSTANCE="{{ .Address }}:{{ .Port }}"
         {{- end }}
 
-        {{- range service "validator-stage-mongo" }}
+        {{- range service "validator-stage-mongo|any" }}
         MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-stage"
         {{- end }}
 
-        {{- range service "uns-record-indexer-postgres-stage" }}
+        {{- range service "uns-record-indexer-postgres-stage|any" }}
         DB_HOST="{{ .Address }}"
         DB_PORT="{{ .Port }}"
         {{- end }}
         EOH
         destination = "local/config.env"
         env = true
+        wait {
+          min = "30s"
+          max = "90s"
+        }
       }
 
       consul {}
@@ -145,7 +150,7 @@ job "api-service-stage" {
       }
 
       resources {
-        cpu = 256
+        cpu = 2048
         memory = 2048
       }
     }

@@ -103,25 +103,29 @@ job "api-service-live" {
         data = <<-EOH
         OPERATOR_REGISTRY_PROCESS_ID="{{ key "smart-contracts/live/operator-registry-address" }}"
 
-        {{- range service "victoriametrics-db" }}
+        {{- range service "victoriametrics-db|any" }}
   	    VICTORIA_METRICS_ADDRESS="http://{{ .Address }}:{{ .Port }}"
 	      {{- end }}
 
-        {{- range service "onionoo-war-live" }}
+        {{- range service "onionoo-war-live|any" }}
         ONIONOO_INSTANCE="{{ .Address }}:{{ .Port }}"
         {{- end }}
 
-        {{- range service "validator-live-mongo" }}
+        {{- range service "validator-live-mongo|any" }}
         MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/api-service-live"
         {{- end }}
 
-        {{- range service "uns-record-indexer-postgres-live" }}
+        {{- range service "uns-record-indexer-postgres-live|any" }}
         DB_HOST="{{ .Address }}"
         DB_PORT="{{ .Port }}"
         {{- end }}
         EOH
         destination = "local/config.env"
         env = true
+        wait {
+          min = "30s"
+          max = "90s"
+        }
       }
 
       consul {}
@@ -145,7 +149,7 @@ job "api-service-live" {
       }
 
       resources {
-        cpu = 256
+        cpu = 4096
         memory = 8192
       }
 
