@@ -9,22 +9,47 @@ const DETAILS_FIELDS = [
     'measured',
     'or_addresses'
 ].join(',');
-const DETAILS_CACHE_TTL_MS = 60_000;
-const DETAILS_TIMEOUT_MS = 30_000;
+const DEFAULT_DETAILS_CACHE_TTL_SECONDS = 60;
+const DEFAULT_DETAILS_TIMEOUT_SECONDS = 30;
+
+function secondsFromEnv(name: string, fallback: number, allowZero: boolean): number {
+    const raw = process.env[name];
+    if (raw === undefined || raw === '') {
+        return fallback;
+    }
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed) || parsed < 0 || (parsed === 0 && !allowZero)) {
+        console.warn(`Invalid ${name} [${raw}]. Using default value of ${fallback}.`);
+        return fallback;
+    }
+    return parsed;
+}
 
 export class OnionooService {
     private baseUrl: string;
+    private detailsCacheTtlMs: number;
+    private detailsTimeoutMs: number;
     private cachedDetails: any = null;
     private cachedDetailsAt: number = 0;
     private pendingDetails: Promise<any> | null = null;
 
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
+        this.detailsCacheTtlMs = 1000 * secondsFromEnv(
+            'ONIONOO_DETAILS_CACHE_TTL_SECONDS',
+            DEFAULT_DETAILS_CACHE_TTL_SECONDS,
+            true
+        );
+        this.detailsTimeoutMs = 1000 * secondsFromEnv(
+            'ONIONOO_DETAILS_TIMEOUT_SECONDS',
+            DEFAULT_DETAILS_TIMEOUT_SECONDS,
+            false
+        );
     }
 
     async details(): Promise<any> {
         const cacheAge = Date.now() - this.cachedDetailsAt;
-        if (this.cachedDetails && cacheAge < DETAILS_CACHE_TTL_MS) {
+        if (this.cachedDetails && cacheAge < this.detailsCacheTtlMs) {
             return this.cachedDetails;
         }
 
@@ -32,7 +57,7 @@ export class OnionooService {
             this.pendingDetails = axios
                 .get(`${this.baseUrl}/details`, {
                     params: { fields: DETAILS_FIELDS },
-                    signal: AbortSignal.timeout(DETAILS_TIMEOUT_MS)
+                    signal: AbortSignal.timeout(this.detailsTimeoutMs)
                 })
                 .then(response => {
                     this.cachedDetails = response.data;

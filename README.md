@@ -66,6 +66,20 @@ This will download and install the latest GeoLite2 City, ASN, and Country databa
 
 ---
 
+## Onionoo details cache
+
+The relay search and map endpoints read relay data from the Onionoo details
+document. The service keeps one copy in memory and shares a single upstream
+request between concurrent callers.
+
+Configuration:
+
+- `ONIONOO_DETAILS_CACHE_TTL_SECONDS` (optional, default `60`): how long a
+  fetched details document is served from memory. Set to `0` to disable
+  caching.
+- `ONIONOO_DETAILS_TIMEOUT_SECONDS` (optional, default `30`): how long to wait
+  for Onionoo before the request is aborted. Must be greater than `0`.
+
 ## Relay search
 
 There is also a relay search endpoint available on each environment:
