@@ -1,5 +1,7 @@
 # api-service
 
+> This repository is no longer maintained. api-service now lives in the [api-services](https://github.com/anyone-protocol/api-services) monorepo under [`apps/api-service`](https://github.com/anyone-protocol/api-services/tree/master/apps/api-service).
+
 One of responsibility of this service is to provide metrics from a Victoria Metrics instance. 
 Not all metrics are available, only specific ones.
 
